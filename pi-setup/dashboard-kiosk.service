@@ -1,0 +1,24 @@
+[Unit]
+Description=Dashboard Kiosk Mode
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+Environment=DISPLAY=:0
+Environment=HOME=/home/pi
+WorkingDirectory=/home/pi
+ExecStartPre=/bin/sleep 10
+ExecStart=/home/pi/kiosk-browser.sh
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/pi/kiosk-service.log
+StandardError=append:/home/pi/kiosk-service.log
+
+# Kill entire process group on stop
+KillMode=process
+
+[Install]
+WantedBy=graphical-session.target

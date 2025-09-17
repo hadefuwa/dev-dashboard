@@ -65,6 +65,8 @@ Jack; Ben; Maciej
 Abdullah; Paul; Hamed
 ```
 
+**Note**: The correct team members are: Jack, Ben, Paul, Abdullah, Hamed, Maciej
+
 ### Example Milestone Completion:
 ```
 Yes    (for completed milestones)

@@ -24,7 +24,7 @@ git push origin master
 git add .
 
 # Commit with descriptive message
-git commit -m "Add new feature or fix bug"
+git commit -m "names"
 
 # Push to GitHub
 git push origin master

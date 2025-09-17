@@ -81,17 +81,18 @@ const sampleProjects = [
 document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
     setupEventListeners();
-    loadProjects();
-    updateKPIs();
 });
 
 // Initialize dashboard with sample data
 function initializeDashboard() {
-    // Check if we have any projects stored, if not, load sample data
-    const storedProjects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
-    if (storedProjects.length === 0) {
-        localStorage.setItem('rdProjects', JSON.stringify(sampleProjects));
-    }
+    // Always load the correct sample projects with proper team members
+    // This ensures team member names are always correct
+    localStorage.setItem('rdProjects', JSON.stringify(sampleProjects));
+    
+    // Load and display projects
+    const projects = loadProjects();
+    displayProjects(projects);
+    updateKPIs();
 }
 
 // Setup event listeners
@@ -867,6 +868,15 @@ function getChecklistStatus(project, checklistType) {
             return progress >= 100 || project.status === 'completed';
         default:
             return false;
+    }
+}
+
+// Reset data function (for development/testing)
+function resetData() {
+    if (confirm('This will reset all data to the default sample projects. Continue?')) {
+        localStorage.removeItem('rdProjects');
+        initializeDashboard();
+        showNotification('Data reset to default sample projects', 'success');
     }
 }
 
