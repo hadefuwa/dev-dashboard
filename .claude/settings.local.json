@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(scp:*)"
+      "Bash(scp:*)",
+      "Bash(ssh:*)",
+      "Bash(winget:*)",
+      "Bash(pacman:*)",
+      "Bash(python:*)",
+      "Bash(start \"C:\\Users\\Adefu\\OneDrive\\Documents\\dev-dashboard\\index.html\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

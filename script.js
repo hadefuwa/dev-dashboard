@@ -136,7 +136,6 @@ async function loadProjects() {
     // TODO: Replace with actual database call
     // For now, load from LocalStorage for development
     const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
-    displayProjects(projects);
     return projects; // Return the projects array
 }
 
@@ -204,6 +203,7 @@ function createProjectCard(project) {
             </div>
             <div class="progress-bar">
                 <div class="progress-fill" style="width: ${project.progress}%"></div>
+                <div class="progress-percentage">${project.progress}%</div>
             </div>
         </div>
         
@@ -645,6 +645,7 @@ function generateTimelineChart(projects) {
                 <div class="timeline-project-name">${project.name}</div>
                 <div class="timeline-bar">
                     <div class="timeline-progress" style="width: ${progressPercent}%"></div>
+                    <div class="progress-percentage">${Math.round(progressPercent)}%</div>
                 </div>
                 <div class="timeline-dates">${formatDate(project.startDate)} - ${formatDate(project.endDate)}</div>
             </div>

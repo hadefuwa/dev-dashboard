@@ -92,6 +92,10 @@ log_message "📍 URL: $DASHBOARD_URL"
     --disable-restore-session-state \
     --disable-new-avatar-menu \
     --disable-new-profile-management \
+    --disable-background-networking \
+    --disable-sync \
+    --disable-background-mode \
+    --disable-extensions-http-throttling \
     --incognito \
     --window-position=0,0 \
     --window-size=1920,1080 \
