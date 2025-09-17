@@ -84,13 +84,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Initialize dashboard with sample data
-function initializeDashboard() {
+async function initializeDashboard() {
     // Always load the correct sample projects with proper team members
     // This ensures team member names are always correct
     localStorage.setItem('rdProjects', JSON.stringify(sampleProjects));
     
     // Load and display projects
-    const projects = loadProjects();
+    const projects = await loadProjects();
     displayProjects(projects);
     updateKPIs();
 }
@@ -137,6 +137,12 @@ async function loadProjects() {
     // For now, load from LocalStorage for development
     const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
     displayProjects(projects);
+    return projects; // Return the projects array
+}
+
+// Get projects without displaying them (for export/import)
+function getProjects() {
+    return JSON.parse(localStorage.getItem('rdProjects') || '[]');
 }
 
 // Display projects on the dashboard
@@ -412,19 +418,29 @@ function applyFilter(filter) {
 // Enhanced export data with multiple formats
 // Export data function
 function exportData() {
-    const projects = loadProjects();
-    
-    // Create Excel-compatible CSV export
-    const csvContent = DataUtils.exportToCSV(projects);
-    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const csvUrl = URL.createObjectURL(csvBlob);
-    const csvLink = document.createElement('a');
-    csvLink.href = csvUrl;
-    csvLink.download = `rd-dashboard-projects-${new Date().toISOString().split('T')[0]}.csv`;
-    csvLink.click();
-    URL.revokeObjectURL(csvUrl);
-    
-    showNotification('Data exported to Excel format! You can now edit it in Excel and import it back.', 'success');
+    try {
+        const projects = getProjects();
+        
+        // Ensure projects is an array
+        if (!Array.isArray(projects)) {
+            throw new Error('No valid projects data found');
+        }
+        
+        // Create Excel-compatible CSV export
+        const csvContent = DataUtils.exportToCSV(projects);
+        const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const csvUrl = URL.createObjectURL(csvBlob);
+        const csvLink = document.createElement('a');
+        csvLink.href = csvUrl;
+        csvLink.download = `rd-dashboard-projects-${new Date().toISOString().split('T')[0]}.csv`;
+        csvLink.click();
+        URL.revokeObjectURL(csvUrl);
+        
+        showNotification('Data exported to Excel format! You can now edit it in Excel and import it back.', 'success');
+    } catch (error) {
+        console.error('Export error:', error);
+        showNotification(`Export failed: ${error.message}`, 'error');
+    }
 }
 
 // Import data function

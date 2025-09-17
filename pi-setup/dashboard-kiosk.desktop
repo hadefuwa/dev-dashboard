@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Dashboard Kiosk
+Exec=/home/pi/kiosk-browser.sh
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Comment=Launch dashboard in kiosk mode
