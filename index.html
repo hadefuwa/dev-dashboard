@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R&D Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Main gradient background with hexagonal pattern -->
+    <div class="hex-pattern"></div>
+    
+    <!-- Header -->
+    <header class="header">
+        <h1 class="dashboard-title">R&D Dashboard</h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="showAddProjectForm()">Add New Project</button>
+            <button class="btn btn-secondary" onclick="exportData()">Export Data</button>
+        </div>
+    </header>
+
+    <!-- Filter Options -->
+    <div class="filter-section">
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">All Projects</button>
+            <button class="filter-btn" data-filter="large">Large Projects</button>
+            <button class="filter-btn" data-filter="small">Small Projects</button>
+            <button class="filter-btn" data-filter="active">Active</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+        </div>
+    </div>
+
+    <!-- Large Projects Section -->
+    <section class="large-projects-section">
+        <h2 class="section-header">Large Projects</h2>
+        <div class="projects-grid" id="large-projects-grid">
+            <!-- Large projects will be loaded here -->
+        </div>
+    </section>
+
+    <!-- Small Projects Section -->
+    <section class="small-projects-section">
+        <h2 class="section-header">Small Projects</h2>
+        <div class="projects-grid" id="small-projects-grid">
+            <!-- Small projects will be loaded here -->
+        </div>
+    </section>
+
+    <!-- Add Project Form Modal -->
+    <div id="project-form-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Project</h2>
+                <span class="close" onclick="hideAddProjectForm()">&times;</span>
+            </div>
+            <form id="project-form" class="project-form">
+                <div class="form-group">
+                    <label for="project-name">Project Name</label>
+                    <input type="text" id="project-name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="project-description">Description</label>
+                    <textarea id="project-description" name="description" rows="3"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="project-type">Project Type</label>
+                        <select id="project-type" name="projectType" required>
+                            <option value="">Select Type</option>
+                            <option value="large">Large Project</option>
+                            <option value="small">Small Project</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="project-status">Status</label>
+                        <select id="project-status" name="status" required>
+                            <option value="active">Active</option>
+                            <option value="paused">Paused</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start-date">Start Date</label>
+                        <input type="date" id="start-date" name="startDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="end-date">End Date</label>
+                        <input type="date" id="end-date" name="endDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="progress">Progress (%)</label>
+                    <input type="range" id="progress" name="progress" min="0" max="100" value="0">
+                    <span id="progress-value">0%</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="team-members">Team Members (comma-separated)</label>
+                    <input type="text" id="team-members" name="teamMembers" placeholder="John Doe, Jane Smith">
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" rows="3"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideAddProjectForm()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Project Details Modal -->
+    <div id="project-details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="details-project-name">Project Details</h2>
+                <span class="close" onclick="hideProjectDetails()">&times;</span>
+            </div>
+            <div id="project-details-content">
+                <!-- Project details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
