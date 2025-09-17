@@ -3,7 +3,7 @@
 // Options: JSONBin.io, Firebase, or Supabase for shared data storage
 // For now, using LocalStorage for development/testing
 
-// Sample data for the 4 large projects
+// Sample data for the 4 large projects with milestones
 const sampleProjects = [
     {
         id: 1,
@@ -15,7 +15,13 @@ const sampleProjects = [
         endDate: "2024-12-31",
         progress: 65,
         teamMembers: ["Dr. Sarah Johnson", "Mike Chen", "Alex Rodriguez"],
-        notes: "Focus on heat transfer optimization and energy efficiency improvements"
+        notes: "Focus on heat transfer optimization and energy efficiency improvements",
+        milestones: [
+            { name: "Initial Research Phase", dueDate: "2024-03-31", completed: true },
+            { name: "Prototype Development", dueDate: "2024-06-30", completed: true },
+            { name: "Testing & Validation", dueDate: "2024-09-30", completed: false },
+            { name: "Final Report", dueDate: "2024-12-31", completed: false }
+        ]
     },
     {
         id: 2,
@@ -27,7 +33,12 @@ const sampleProjects = [
         endDate: "2024-11-30",
         progress: 45,
         teamMembers: ["Dr. Emily Watson", "James Liu", "Maria Garcia"],
-        notes: "Investigating new composite materials and structural integrity testing"
+        notes: "Investigating new composite materials and structural integrity testing",
+        milestones: [
+            { name: "Material Analysis", dueDate: "2024-04-30", completed: true },
+            { name: "Design Phase", dueDate: "2024-07-31", completed: false },
+            { name: "Construction Testing", dueDate: "2024-10-31", completed: false }
+        ]
     },
     {
         id: 3,
@@ -39,7 +50,13 @@ const sampleProjects = [
         endDate: "2024-10-15",
         progress: 80,
         teamMembers: ["Robert Kim", "Lisa Thompson", "David Park"],
-        notes: "Implementing AI-driven predictive maintenance algorithms"
+        notes: "Implementing AI-driven predictive maintenance algorithms",
+        milestones: [
+            { name: "Algorithm Development", dueDate: "2024-03-31", completed: true },
+            { name: "System Integration", dueDate: "2024-06-30", completed: true },
+            { name: "Field Testing", dueDate: "2024-09-30", completed: false },
+            { name: "Deployment", dueDate: "2024-10-15", completed: false }
+        ]
     },
     {
         id: 4,
@@ -51,7 +68,12 @@ const sampleProjects = [
         endDate: "2024-08-31",
         progress: 30,
         teamMembers: ["Dr. Alan Foster", "Jennifer Lee", "Tom Wilson"],
-        notes: "Currently on hold pending funding approval for next phase"
+        notes: "Currently on hold pending funding approval for next phase",
+        milestones: [
+            { name: "Concept Design", dueDate: "2024-01-31", completed: true },
+            { name: "Component Development", dueDate: "2024-05-31", completed: false },
+            { name: "Integration Testing", dueDate: "2024-08-31", completed: false }
+        ]
     }
 ];
 
@@ -359,24 +381,322 @@ function applyFilter(filter) {
     displayProjects(filteredProjects);
 }
 
-// Export data
+// Enhanced export data with multiple formats
 function exportData() {
     const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
-    const data = {
-        projects: projects,
-        exportDate: new Date().toISOString(),
-        version: '1.0'
+    
+    // Show export options
+    const exportType = confirm('Click OK for JSON backup, Cancel for CSV export');
+    
+    if (exportType) {
+        // JSON Export
+        const data = DataUtils.createBackup();
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `rd-dashboard-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        alert('JSON backup exported successfully!');
+    } else {
+        // CSV Export
+        const csvContent = DataUtils.exportToCSV(projects);
+        const blob = new Blob([csvContent], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `rd-dashboard-projects-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        alert('CSV export completed successfully!');
+    }
+}
+
+// Milestone Management Functions
+function addMilestone() {
+    const container = document.getElementById('milestones-container');
+    const milestoneItem = document.createElement('div');
+    milestoneItem.className = 'milestone-item';
+    milestoneItem.innerHTML = `
+        <input type="text" name="milestone-name" placeholder="Milestone name" class="milestone-input">
+        <input type="date" name="milestone-date" class="milestone-date">
+        <button type="button" class="btn-remove-milestone" onclick="removeMilestone(this)">×</button>
+    `;
+    container.appendChild(milestoneItem);
+}
+
+function removeMilestone(button) {
+    button.parentElement.remove();
+}
+
+// Reports Functions
+function showReports() {
+    const modal = document.getElementById('reports-modal');
+    modal.style.display = 'block';
+    generateReports();
+}
+
+function hideReports() {
+    document.getElementById('reports-modal').style.display = 'none';
+}
+
+function generateReports() {
+    const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
+    
+    // Calculate detailed statistics using DataUtils
+    const stats = DataUtils.calculateProjectStats(projects);
+    
+    // Update statistics display
+    document.getElementById('total-projects').textContent = stats.total;
+    document.getElementById('active-projects').textContent = stats.byStatus.active;
+    document.getElementById('completed-projects').textContent = stats.byStatus.completed;
+    document.getElementById('avg-progress').textContent = stats.avgProgress + '%';
+    
+    // Generate timeline chart
+    generateTimelineChart(projects);
+    
+    // Generate team statistics
+    generateTeamStats(projects);
+    
+    // Add additional statistics to the reports
+    addDetailedStats(stats);
+}
+
+function addDetailedStats(stats) {
+    // Add more detailed statistics to the reports modal
+    const reportsContent = document.querySelector('.reports-content');
+    
+    // Check if detailed stats section already exists
+    let detailedStatsSection = document.getElementById('detailed-stats-section');
+    if (!detailedStatsSection) {
+        detailedStatsSection = document.createElement('div');
+        detailedStatsSection.id = 'detailed-stats-section';
+        detailedStatsSection.className = 'report-section';
+        detailedStatsSection.innerHTML = `
+            <h3>Detailed Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">${stats.byType.large}</div>
+                    <div class="stat-label">Large Projects</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.byType.small}</div>
+                    <div class="stat-label">Small Projects</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.totalTeamMembers}</div>
+                    <div class="stat-label">Team Members</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.totalMilestones}</div>
+                    <div class="stat-label">Total Milestones</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.byStatus.paused}</div>
+                    <div class="stat-label">Paused Projects</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.overdueProjects}</div>
+                    <div class="stat-label">Overdue Projects</div>
+                </div>
+            </div>
+        `;
+        
+        // Insert before the timeline section
+        const timelineSection = document.querySelector('.report-section:nth-child(2)');
+        timelineSection.parentNode.insertBefore(detailedStatsSection, timelineSection);
+    } else {
+        // Update existing detailed stats
+        detailedStatsSection.querySelector('.stat-card:nth-child(1) .stat-number').textContent = stats.byType.large;
+        detailedStatsSection.querySelector('.stat-card:nth-child(2) .stat-number').textContent = stats.byType.small;
+        detailedStatsSection.querySelector('.stat-card:nth-child(3) .stat-number').textContent = stats.totalTeamMembers;
+        detailedStatsSection.querySelector('.stat-card:nth-child(4) .stat-number').textContent = stats.totalMilestones;
+        detailedStatsSection.querySelector('.stat-card:nth-child(5) .stat-number').textContent = stats.byStatus.paused;
+        detailedStatsSection.querySelector('.stat-card:nth-child(6) .stat-number').textContent = stats.overdueProjects;
+    }
+}
+
+function generateTimelineChart(projects) {
+    const chartContainer = document.getElementById('timeline-chart');
+    
+    // Simple timeline visualization
+    let timelineHTML = '<div class="timeline-simple">';
+    
+    projects.forEach(project => {
+        const startDate = new Date(project.startDate);
+        const endDate = new Date(project.endDate);
+        const today = new Date();
+        
+        // Calculate progress position
+        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        const daysPassed = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
+        const progressPercent = Math.max(0, Math.min(100, (daysPassed / totalDays) * 100));
+        
+        timelineHTML += `
+            <div class="timeline-item">
+                <div class="timeline-project-name">${project.name}</div>
+                <div class="timeline-bar">
+                    <div class="timeline-progress" style="width: ${progressPercent}%"></div>
+                </div>
+                <div class="timeline-dates">${formatDate(project.startDate)} - ${formatDate(project.endDate)}</div>
+            </div>
+        `;
+    });
+    
+    timelineHTML += '</div>';
+    chartContainer.innerHTML = timelineHTML;
+}
+
+function generateTeamStats(projects) {
+    const teamContainer = document.getElementById('team-stats');
+    const teamStats = {};
+    
+    // Count projects per team member
+    projects.forEach(project => {
+        if (project.teamMembers) {
+            project.teamMembers.forEach(member => {
+                teamStats[member] = (teamStats[member] || 0) + 1;
+            });
+        }
+    });
+    
+    // Sort by project count
+    const sortedTeams = Object.entries(teamStats)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 10); // Show top 10 team members
+    
+    let teamHTML = '';
+    if (sortedTeams.length === 0) {
+        teamHTML = '<div style="text-align: center; color: rgba(255,255,255,0.6);">No team data available</div>';
+    } else {
+        sortedTeams.forEach(([member, count]) => {
+            teamHTML += `
+                <div class="team-member-stat">
+                    <span class="member-name">${member}</span>
+                    <span class="member-projects">${count} project${count !== 1 ? 's' : ''}</span>
+                </div>
+            `;
+        });
+    }
+    
+    teamContainer.innerHTML = teamHTML;
+}
+
+// Enhanced project details with milestones
+function viewProjectDetails(projectId) {
+    const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
+    const project = projects.find(p => p.id === projectId);
+    
+    if (!project) return;
+    
+    document.getElementById('details-project-name').textContent = project.name;
+    
+    const detailsContent = document.getElementById('project-details-content');
+    detailsContent.innerHTML = `
+        <div style="padding: 20px;">
+            <div style="margin-bottom: 20px;">
+                <h3 style="color: #87CEEB; margin-bottom: 10px;">Description</h3>
+                <p style="color: rgba(255,255,255,0.8);">${project.description}</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <h3 style="color: #87CEEB; margin-bottom: 10px;">Project Info</h3>
+                    <p><strong>Type:</strong> ${project.projectType}</p>
+                    <p><strong>Status:</strong> ${project.status}</p>
+                    <p><strong>Progress:</strong> ${project.progress}%</p>
+                </div>
+                <div>
+                    <h3 style="color: #87CEEB; margin-bottom: 10px;">Timeline</h3>
+                    <p><strong>Start Date:</strong> ${formatDate(project.startDate)}</p>
+                    <p><strong>End Date:</strong> ${formatDate(project.endDate)}</p>
+                </div>
+            </div>
+            
+            ${project.teamMembers && project.teamMembers.length > 0 ? `
+            <div style="margin-bottom: 20px;">
+                <h3 style="color: #87CEEB; margin-bottom: 10px;">Team Members</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    ${project.teamMembers.map(member => `<span class="team-member">${member}</span>`).join('')}
+                </div>
+            </div>
+            ` : ''}
+            
+            ${project.milestones && project.milestones.length > 0 ? `
+            <div style="margin-bottom: 20px;">
+                <h3 style="color: #87CEEB; margin-bottom: 10px;">Milestones</h3>
+                <div style="background: rgba(47, 27, 77, 0.6); border-radius: 8px; padding: 15px;">
+                    ${project.milestones.map(milestone => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(135, 206, 235, 0.2);">
+                            <div>
+                                <span style="color: ${milestone.completed ? '#2ecc71' : '#f39c12'};">
+                                    ${milestone.completed ? '✓' : '○'}
+                                </span>
+                                <span style="color: ${milestone.completed ? 'rgba(255,255,255,0.6)' : '#87CEEB'}; margin-left: 10px;">
+                                    ${milestone.name}
+                                </span>
+                            </div>
+                            <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">
+                                ${formatDate(milestone.dueDate)}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            ` : ''}
+            
+            ${project.notes ? `
+            <div>
+                <h3 style="color: #87CEEB; margin-bottom: 10px;">Notes</h3>
+                <p style="color: rgba(255,255,255,0.8);">${project.notes}</p>
+            </div>
+            ` : ''}
+        </div>
+    `;
+    
+    document.getElementById('project-details-modal').style.display = 'block';
+}
+
+// Enhanced form submission with milestones
+function handleProjectSubmit(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    
+    // Collect milestones
+    const milestones = [];
+    const milestoneNames = formData.getAll('milestone-name');
+    const milestoneDates = formData.getAll('milestone-date');
+    
+    for (let i = 0; i < milestoneNames.length; i++) {
+        if (milestoneNames[i] && milestoneDates[i]) {
+            milestones.push({
+                name: milestoneNames[i],
+                dueDate: milestoneDates[i],
+                completed: false
+            });
+        }
+    }
+    
+    const projectData = {
+        id: Date.now(), // Simple unique ID
+        name: formData.get('name'),
+        description: formData.get('description'),
+        projectType: formData.get('projectType'),
+        status: formData.get('status'),
+        startDate: formData.get('startDate'),
+        endDate: formData.get('endDate'),
+        progress: parseInt(formData.get('progress')),
+        teamMembers: formData.get('teamMembers') ? 
+            formData.get('teamMembers').split(',').map(m => m.trim()).filter(m => m) : [],
+        milestones: milestones,
+        notes: formData.get('notes'),
+        createdAt: new Date().toISOString()
     };
     
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'rd-dashboard-backup.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    alert('Data exported successfully!');
+    saveProject(projectData);
+    hideAddProjectForm();
 }
 
 // Future: Real-time updates when database changes
