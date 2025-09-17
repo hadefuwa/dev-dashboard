@@ -22,7 +22,8 @@
             <div class="header-actions">
                 <button class="btn btn-primary" onclick="showAddProjectForm()">Add New Project</button>
                 <button class="btn btn-secondary" onclick="showReports()">Reports</button>
-                <button class="btn btn-secondary" onclick="exportData()">Export Data</button>
+                <button class="btn btn-secondary" onclick="exportData()">Export to Excel</button>
+                <button class="btn btn-secondary" onclick="importData()">Import from Excel</button>
             </div>
             <div class="logo-container">
                 <img src="matrix-logo.png" alt="Matrix Logo" class="matrix-logo">
@@ -228,6 +229,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="import-file-input" accept=".csv,.xlsx,.xls" style="display: none;" onchange="handleFileImport(event)">
 
     <script src="data.js"></script>
     <script src="script.js"></script>

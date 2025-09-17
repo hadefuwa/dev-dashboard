@@ -56,27 +56,175 @@ function sanitizeProjectData(projectData) {
 
 // Data export/import functions
 function exportToCSV(projects) {
+    if (!projects || projects.length === 0) {
+        return 'No projects to export';
+    }
+
+    // CSV headers - Excel friendly format
     const headers = [
-        'Name', 'Type', 'Status', 'Progress', 'Start Date', 'End Date', 
-        'Team Members', 'Milestones', 'Notes'
+        'ID',
+        'Name', 
+        'Description',
+        'Project Type',
+        'Status',
+        'Start Date',
+        'End Date',
+        'Progress (%)',
+        'Team Members',
+        'Notes',
+        'Milestone 1 Name',
+        'Milestone 1 Due Date',
+        'Milestone 1 Completed',
+        'Milestone 2 Name',
+        'Milestone 2 Due Date',
+        'Milestone 2 Completed',
+        'Milestone 3 Name',
+        'Milestone 3 Due Date',
+        'Milestone 3 Completed',
+        'Milestone 4 Name',
+        'Milestone 4 Due Date',
+        'Milestone 4 Completed',
+        'Milestone 5 Name',
+        'Milestone 5 Due Date',
+        'Milestone 5 Completed'
     ];
-    
-    const csvContent = [
-        headers.join(','),
-        ...projects.map(project => [
-            `"${project.name}"`,
+
+    // Convert projects to CSV rows
+    const rows = projects.map(project => {
+        const teamMembers = project.teamMembers ? project.teamMembers.join('; ') : '';
+        const milestones = project.milestones || [];
+        
+        // Create row with all milestone columns
+        const row = [
+            project.id,
+            project.name,
+            project.description,
             project.projectType,
             project.status,
-            project.progress,
             project.startDate,
             project.endDate,
-            `"${project.teamMembers ? project.teamMembers.join('; ') : ''}"`,
-            `"${project.milestones ? project.milestones.map(m => m.name).join('; ') : ''}"`,
-            `"${project.notes || ''}"`
-        ].join(','))
-    ].join('\n');
-    
+            project.progress,
+            teamMembers,
+            project.notes || ''
+        ];
+
+        // Add milestone data (up to 5 milestones)
+        for (let i = 0; i < 5; i++) {
+            if (milestones[i]) {
+                row.push(milestones[i].name);
+                row.push(milestones[i].dueDate);
+                row.push(milestones[i].completed ? 'Yes' : 'No');
+            } else {
+                row.push('');
+                row.push('');
+                row.push('');
+            }
+        }
+
+        return row;
+    });
+
+    // Combine headers and rows
+    const csvContent = [headers, ...rows]
+        .map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
     return csvContent;
+}
+
+function importFromCSV(csvContent) {
+    try {
+        const lines = csvContent.split('\n').filter(line => line.trim());
+        if (lines.length < 2) {
+            throw new Error('CSV file must contain headers and at least one data row');
+        }
+
+        // Parse headers
+        const headers = parseCSVLine(lines[0]);
+        const expectedHeaders = [
+            'ID', 'Name', 'Description', 'Project Type', 'Status',
+            'Start Date', 'End Date', 'Progress (%)', 'Team Members', 'Notes'
+        ];
+
+        // Validate headers
+        for (let i = 0; i < expectedHeaders.length; i++) {
+            if (!headers[i] || headers[i].toLowerCase() !== expectedHeaders[i].toLowerCase()) {
+                throw new Error(`Invalid header: expected "${expectedHeaders[i]}", found "${headers[i]}"`);
+            }
+        }
+
+        // Parse data rows
+        const projects = [];
+        for (let i = 1; i < lines.length; i++) {
+            const values = parseCSVLine(lines[i]);
+            
+            if (values.length < 10) {
+                console.warn(`Skipping row ${i + 1}: insufficient data`);
+                continue;
+            }
+
+            // Parse basic project data
+            const project = {
+                id: parseInt(values[0]) || Date.now() + i,
+                name: values[1],
+                description: values[2],
+                projectType: values[3] || 'small',
+                status: values[4] || 'active',
+                startDate: values[5],
+                endDate: values[6],
+                progress: parseInt(values[7]) || 0,
+                teamMembers: values[8] ? values[8].split(';').map(m => m.trim()).filter(m => m) : [],
+                notes: values[9] || '',
+                milestones: []
+            };
+
+            // Parse milestones (columns 10-24)
+            for (let j = 0; j < 5; j++) {
+                const milestoneIndex = 10 + (j * 3);
+                if (values[milestoneIndex] && values[milestoneIndex].trim()) {
+                    project.milestones.push({
+                        name: values[milestoneIndex],
+                        dueDate: values[milestoneIndex + 1] || '',
+                        completed: values[milestoneIndex + 2] === 'Yes'
+                    });
+                }
+            }
+
+            projects.push(project);
+        }
+
+        return projects;
+    } catch (error) {
+        throw new Error(`Import failed: ${error.message}`);
+    }
+}
+
+// Helper function to parse CSV line
+function parseCSVLine(line) {
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+                current += '"';
+                i++; // Skip next quote
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (char === ',' && !inQuotes) {
+            values.push(current);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    
+    values.push(current);
+    return values.map(v => v.trim().replace(/^"(.*)"$/, '$1'));
 }
 
 function importFromJSON(jsonData) {
@@ -227,6 +375,7 @@ window.DataUtils = {
     validateProjectData,
     sanitizeProjectData,
     exportToCSV,
+    importFromCSV,
     importFromJSON,
     createBackup,
     restoreBackup,

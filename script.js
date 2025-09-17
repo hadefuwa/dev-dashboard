@@ -409,34 +409,97 @@ function applyFilter(filter) {
 }
 
 // Enhanced export data with multiple formats
+// Export data function
 function exportData() {
-    const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
+    const projects = loadProjects();
     
-    // Show export options
-    const exportType = confirm('Click OK for JSON backup, Cancel for CSV export');
+    // Create Excel-compatible CSV export
+    const csvContent = DataUtils.exportToCSV(projects);
+    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvUrl = URL.createObjectURL(csvBlob);
+    const csvLink = document.createElement('a');
+    csvLink.href = csvUrl;
+    csvLink.download = `rd-dashboard-projects-${new Date().toISOString().split('T')[0]}.csv`;
+    csvLink.click();
+    URL.revokeObjectURL(csvUrl);
     
-    if (exportType) {
-        // JSON Export
-        const data = DataUtils.createBackup();
-        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `rd-dashboard-backup-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        alert('JSON backup exported successfully!');
-    } else {
-        // CSV Export
-        const csvContent = DataUtils.exportToCSV(projects);
-        const blob = new Blob([csvContent], {type: 'text/csv'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `rd-dashboard-projects-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-        alert('CSV export completed successfully!');
+    showNotification('Data exported to Excel format! You can now edit it in Excel and import it back.', 'success');
+}
+
+// Import data function
+function importData() {
+    // Trigger file input
+    document.getElementById('import-file-input').click();
+}
+
+// Handle file import
+function handleFileImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const content = e.target.result;
+            
+            // Check file type
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                importFromCSV(content);
+            } else {
+                showNotification('Please use CSV files for import. Excel files (.xlsx, .xls) are not supported yet.', 'error');
+                return;
+            }
+        } catch (error) {
+            showNotification(`Import failed: ${error.message}`, 'error');
+        }
+    };
+    
+    reader.readAsText(file);
+}
+
+// Import from CSV content
+function importFromCSV(csvContent) {
+    try {
+        const importedProjects = DataUtils.importFromCSV(csvContent);
+        
+        if (importedProjects.length === 0) {
+            showNotification('No valid projects found in the CSV file.', 'error');
+            return;
+        }
+        
+        // Validate imported data
+        const validProjects = [];
+        const errors = [];
+        
+        importedProjects.forEach((project, index) => {
+            const validationErrors = DataUtils.validateProjectData(project);
+            if (validationErrors.length === 0) {
+                validProjects.push(DataUtils.sanitizeProjectData(project));
+            } else {
+                errors.push(`Row ${index + 2}: ${validationErrors.join(', ')}`);
+            }
+        });
+        
+        if (validProjects.length === 0) {
+            showNotification('No valid projects found. Please check your CSV format.', 'error');
+            return;
+        }
+        
+        // Confirm import
+        const confirmMessage = `Import ${validProjects.length} projects?${errors.length > 0 ? `\n\n${errors.length} rows had errors and will be skipped.` : ''}`;
+        if (confirm(confirmMessage)) {
+            // Save imported projects
+            localStorage.setItem('rdProjects', JSON.stringify(validProjects));
+            
+            // Refresh dashboard
+            initializeDashboard();
+            
+            const message = `Successfully imported ${validProjects.length} projects.${errors.length > 0 ? ` ${errors.length} rows were skipped due to errors.` : ''}`;
+            showNotification(message, 'success');
+        }
+        
+    } catch (error) {
+        showNotification(`Import failed: ${error.message}`, 'error');
     }
 }
 
