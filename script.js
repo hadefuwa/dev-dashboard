@@ -14,7 +14,7 @@ const sampleProjects = [
         startDate: "2024-01-15",
         endDate: "2024-12-31",
         progress: 65,
-        teamMembers: ["Dr. Sarah Johnson", "Mike Chen", "Alex Rodriguez"],
+        teamMembers: ["Jack", "Ben", "Maciej"],
         notes: "Focus on heat transfer optimization and energy efficiency improvements",
         milestones: [
             { name: "Initial Research Phase", dueDate: "2024-03-31", completed: true },
@@ -32,7 +32,7 @@ const sampleProjects = [
         startDate: "2024-02-01",
         endDate: "2024-11-30",
         progress: 45,
-        teamMembers: ["Dr. Emily Watson", "James Liu", "Maria Garcia"],
+        teamMembers: ["Abdullah", "Paul", "Hamed"],
         notes: "Investigating new composite materials and structural integrity testing",
         milestones: [
             { name: "Material Analysis", dueDate: "2024-04-30", completed: true },
@@ -49,7 +49,7 @@ const sampleProjects = [
         startDate: "2024-07-01",
         endDate: "2025-10-15",
         progress: 80,
-        teamMembers: ["Robert Kim", "Lisa Thompson", "David Park"],
+        teamMembers: ["Jack", "Abdullah", "Ben"],
         notes: "Implementing AI-driven predictive maintenance algorithms",
         milestones: [
             { name: "Algorithm Development", dueDate: "2024-03-31", completed: true },
@@ -67,7 +67,7 @@ const sampleProjects = [
         startDate: "2023-11-01",
         endDate: "2024-08-31",
         progress: 30,
-        teamMembers: ["Dr. Alan Foster", "Jennifer Lee", "Tom Wilson"],
+        teamMembers: ["Maciej", "Paul", "Hamed"],
         notes: "Currently on hold pending funding approval for next phase",
         milestones: [
             { name: "Concept Design", dueDate: "2024-01-31", completed: true },
@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
     setupEventListeners();
     loadProjects();
+    updateKPIs();
 });
 
 // Initialize dashboard with sample data
@@ -208,6 +209,28 @@ function createProjectCard(project) {
         </div>
         ` : ''}
         
+        <div class="project-checklist">
+            <div class="checklist-label">Project Checklist</div>
+            <div class="checklist-items">
+                <div class="checklist-item">
+                    <input type="checkbox" ${getChecklistStatus(project, 'engineering-docs') ? 'checked' : ''} disabled>
+                    <label>Engineering Docs</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" ${getChecklistStatus(project, 'alpha-prototype') ? 'checked' : ''} disabled>
+                    <label>Alpha Prototype</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" ${getChecklistStatus(project, 'beta-prototype') ? 'checked' : ''} disabled>
+                    <label>Beta Prototype</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" ${getChecklistStatus(project, 'production') ? 'checked' : ''} disabled>
+                    <label>Production</label>
+                </div>
+            </div>
+        </div>
+        
         <div class="project-actions">
             <button class="action-btn edit" onclick="viewProjectDetails(${project.id})">View Details</button>
             <button class="action-btn edit" onclick="editProject(${project.id})">Edit</button>
@@ -276,6 +299,9 @@ async function saveProject(projectData) {
     
     // Reload and display projects
     loadProjects();
+    
+    // Update KPIs
+    updateKPIs();
     
     // Show success message
     alert('Project saved successfully!');
@@ -350,6 +376,7 @@ function deleteProject(projectId) {
         const filteredProjects = projects.filter(p => p.id !== projectId);
         localStorage.setItem('rdProjects', JSON.stringify(filteredProjects));
         loadProjects();
+        updateKPIs();
         alert('Project deleted successfully!');
     }
 }
@@ -697,6 +724,87 @@ function handleProjectSubmit(event) {
     
     saveProject(projectData);
     hideAddProjectForm();
+}
+
+// KPI Functions
+function updateKPIs() {
+    const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
+    
+    // Calculate KPIs
+    const runningProjects = projects.filter(p => p.status === 'active').length;
+    const completedThisYear = projects.filter(p => {
+        if (p.status !== 'completed') return false;
+        const completedDate = new Date(p.completedDate || p.endDate);
+        const currentYear = new Date().getFullYear();
+        return completedDate.getFullYear() === currentYear;
+    }).length;
+    
+    const overdueProjects = projects.filter(p => {
+        if (p.status === 'completed') return false;
+        const endDate = new Date(p.endDate);
+        const today = new Date();
+        return endDate < today;
+    }).length;
+    
+    const unstartedProjects = projects.filter(p => {
+        if (p.status === 'completed') return false;
+        const startDate = new Date(p.startDate);
+        const today = new Date();
+        return startDate > today;
+    }).length;
+    
+    const piFormsCompleted = projects.filter(p => {
+        // Count projects that have milestones with "PI" in the name
+        return p.milestones && p.milestones.some(m => 
+            m.name.toLowerCase().includes('pi') && m.completed
+        );
+    }).length;
+    
+    // Update KPI displays
+    document.getElementById('kpi-running-projects').textContent = runningProjects;
+    document.getElementById('kpi-completed-this-year').textContent = completedThisYear;
+    document.getElementById('kpi-overdue-projects').textContent = overdueProjects;
+    document.getElementById('kpi-unstarted-projects').textContent = unstartedProjects;
+    document.getElementById('kpi-pi-forms-completed').textContent = piFormsCompleted;
+    
+    // Add animation effect
+    animateKPIUpdates();
+}
+
+function animateKPIUpdates() {
+    const kpiNumbers = document.querySelectorAll('.kpi-number');
+    kpiNumbers.forEach(number => {
+        const finalValue = parseInt(number.textContent);
+        let currentValue = 0;
+        const increment = Math.ceil(finalValue / 20);
+        
+        const timer = setInterval(() => {
+            currentValue += increment;
+            if (currentValue >= finalValue) {
+                currentValue = finalValue;
+                clearInterval(timer);
+            }
+            number.textContent = currentValue;
+        }, 50);
+    });
+}
+
+// Checklist Status Functions
+function getChecklistStatus(project, checklistType) {
+    const progress = project.progress || 0;
+    
+    switch (checklistType) {
+        case 'engineering-docs':
+            return progress >= 25;
+        case 'alpha-prototype':
+            return progress >= 50;
+        case 'beta-prototype':
+            return progress >= 75;
+        case 'production':
+            return progress >= 100 || project.status === 'completed';
+        default:
+            return false;
+    }
 }
 
 // Future: Real-time updates when database changes

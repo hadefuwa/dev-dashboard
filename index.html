@@ -12,13 +12,46 @@
     
     <!-- Header -->
     <header class="header">
-        <h1 class="dashboard-title">R&D Dashboard</h1>
-        <div class="header-actions">
-            <button class="btn btn-primary" onclick="showAddProjectForm()">Add New Project</button>
-            <button class="btn btn-secondary" onclick="showReports()">Reports</button>
-            <button class="btn btn-secondary" onclick="exportData()">Export Data</button>
+        <div class="header-left">
+            <h1 class="dashboard-title">R&D Dashboard</h1>
+        </div>
+        <div class="header-right">
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showAddProjectForm()">Add New Project</button>
+                <button class="btn btn-secondary" onclick="showReports()">Reports</button>
+                <button class="btn btn-secondary" onclick="exportData()">Export Data</button>
+            </div>
+            <div class="logo-container">
+                <img src="matrix-logo.png" alt="Matrix Logo" class="matrix-logo">
+            </div>
         </div>
     </header>
+
+    <!-- KPI Section -->
+    <section class="kpi-section">
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <div class="kpi-number" id="kpi-running-projects">0</div>
+                <div class="kpi-label">Running Projects</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="kpi-completed-this-year">0</div>
+                <div class="kpi-label">Completed This Year</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="kpi-overdue-projects">0</div>
+                <div class="kpi-label">Overdue Projects</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="kpi-unstarted-projects">0</div>
+                <div class="kpi-label">Unstarted Projects</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="kpi-pi-forms-completed">0</div>
+                <div class="kpi-label">PI Forms Completed</div>
+            </div>
+        </div>
+    </section>
 
     <!-- Filter Options -->
     <div class="filter-section">
