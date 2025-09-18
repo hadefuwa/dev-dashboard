@@ -105,65 +105,8 @@ log_message "📍 URL: $DASHBOARD_URL"
 CHROMIUM_PID=$!
 log_message "✅ Chromium started with PID: $CHROMIUM_PID"
 
-# Monitor the browser process and restart if it crashes
-while true; do
-    # Check if any chromium process is running (more reliable than checking single PID)
-    if ! pgrep -f "/usr/lib/chromium/chromium.*--kiosk" > /dev/null; then
-        log_message "❌ Chromium not running, restarting in 5 seconds..."
-        sleep 5
+log_message "🎯 Chromium launched successfully - no monitoring needed"
+log_message "📋 Script completed. Chromium will run independently."
 
-        # Kill any remaining processes
-        pkill -f chromium-browser 2>/dev/null || true
-        sleep 2
-
-        # Restart Chromium
-        log_message "🔄 Restarting Chromium..."
-        /usr/bin/chromium-browser \
-            --display=:0 \
-            --kiosk \
-            --no-sandbox \
-            --disable-infobars \
-            --disable-extensions \
-            --disable-plugins \
-            --disable-translate \
-            --disable-notifications \
-            --disable-features=TranslateUI \
-            --disable-ipc-flooding-protection \
-            --disable-backgrounding-occluded-windows \
-            --disable-background-timer-throttling \
-            --disable-renderer-backgrounding \
-            --disable-field-trial-config \
-            --disable-back-forward-cache \
-            --disable-features=VizDisplayCompositor \
-            --enable-features=OverlayScrollbar \
-            --start-fullscreen \
-            --no-first-run \
-            --fast \
-            --fast-start \
-            --disable-default-apps \
-            --disable-popup-blocking \
-            --disable-prompt-on-repost \
-            --no-message-box \
-            --disable-hang-monitor \
-            --disable-logging \
-            --silent-debugger-extension-api \
-            --disable-web-security \
-            --allow-running-insecure-content \
-            --autoplay-policy=no-user-gesture-required \
-            --disable-session-crashed-bubble \
-            --disable-restore-session-state \
-            --disable-new-avatar-menu \
-            --disable-new-profile-management \
-            --incognito \
-            --window-position=0,0 \
-            --window-size=1920,1080 \
-            --app="$DASHBOARD_URL" \
-            >> "$LOG_FILE" 2>&1 &
-
-        CHROMIUM_PID=$!
-        log_message "✅ Chromium restarted with PID: $CHROMIUM_PID"
-    fi
-
-    # Check every 30 seconds instead of 10 to reduce system load
-    sleep 30
-done
+# Keep the script running so systemd doesn't think it failed
+wait
