@@ -107,8 +107,9 @@ log_message "✅ Chromium started with PID: $CHROMIUM_PID"
 
 # Monitor the browser process and restart if it crashes
 while true; do
-    if ! kill -0 $CHROMIUM_PID 2>/dev/null; then
-        log_message "❌ Chromium crashed, restarting in 5 seconds..."
+    # Check if any chromium process is running (more reliable than checking single PID)
+    if ! pgrep -f "chromium-browser.*$DASHBOARD_URL" > /dev/null; then
+        log_message "❌ Chromium not running, restarting in 5 seconds..."
         sleep 5
 
         # Kill any remaining processes
@@ -163,5 +164,6 @@ while true; do
         log_message "✅ Chromium restarted with PID: $CHROMIUM_PID"
     fi
 
-    sleep 10
+    # Check every 30 seconds instead of 10 to reduce system load
+    sleep 30
 done
