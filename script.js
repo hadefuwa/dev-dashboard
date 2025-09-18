@@ -3,7 +3,7 @@
 // Options: JSONBin.io, Firebase, or Supabase for shared data storage
 // For now, using LocalStorage for development/testing
 
-// Sample data for the 4 large projects with milestones
+// Sample data with more projects to populate KPIs with realistic numbers
 const sampleProjects = [
     {
         id: 1,
@@ -73,6 +73,171 @@ const sampleProjects = [
             { name: "Concept Design", dueDate: "2024-01-31", completed: true },
             { name: "Component Development", dueDate: "2024-05-31", completed: false },
             { name: "Integration Testing", dueDate: "2024-08-31", completed: false }
+        ]
+    },
+    // COMPLETED PROJECTS (to show in "Completed This Year" KPI)
+    {
+        id: 5,
+        name: "Smart Sensors Network",
+        description: "Development of wireless sensor network for industrial monitoring",
+        projectType: "large",
+        status: "completed",
+        startDate: "2023-09-01",
+        endDate: "2024-05-15",
+        progress: 100,
+        teamMembers: ["Ben", "Maciej", "Jack"],
+        notes: "Successfully deployed across 3 manufacturing facilities",
+        completedDate: "2024-05-15",
+        milestones: [
+            { name: "PI Form Submission", dueDate: "2023-10-15", completed: true },
+            { name: "Prototype Testing", dueDate: "2024-01-31", completed: true },
+            { name: "Final Deployment", dueDate: "2024-05-15", completed: true }
+        ]
+    },
+    {
+        id: 6,
+        name: "Energy Efficiency Audit",
+        description: "Comprehensive energy audit and optimization recommendations",
+        projectType: "small",
+        status: "completed",
+        startDate: "2024-01-10",
+        endDate: "2024-07-30",
+        progress: 100,
+        teamMembers: ["Abdullah", "Paul"],
+        notes: "Achieved 15% energy reduction across all facilities",
+        completedDate: "2024-07-30",
+        milestones: [
+            { name: "Data Collection", dueDate: "2024-03-15", completed: true },
+            { name: "Analysis Report", dueDate: "2024-06-30", completed: true },
+            { name: "Implementation Plan", dueDate: "2024-07-30", completed: true }
+        ]
+    },
+    {
+        id: 7,
+        name: "Process Automation Study",
+        description: "Analysis of automation opportunities in manufacturing processes",
+        projectType: "small",
+        status: "completed",
+        startDate: "2024-03-01",
+        endDate: "2024-08-15",
+        progress: 100,
+        teamMembers: ["Hamed", "Jack"],
+        notes: "Identified 12 key automation opportunities with ROI projections",
+        completedDate: "2024-08-15",
+        milestones: [
+            { name: "PI Documentation", dueDate: "2024-03-15", completed: true },
+            { name: "Process Mapping", dueDate: "2024-05-30", completed: true },
+            { name: "Final Recommendations", dueDate: "2024-08-15", completed: true }
+        ]
+    },
+    // OVERDUE PROJECTS (to show in "Overdue Projects" KPI)
+    {
+        id: 8,
+        name: "Legacy System Migration",
+        description: "Migration of legacy control systems to modern platforms",
+        projectType: "large",
+        status: "active",
+        startDate: "2023-10-01",
+        endDate: "2024-06-30", // This is overdue
+        progress: 75,
+        teamMembers: ["Paul", "Ben", "Abdullah"],
+        notes: "Delayed due to compatibility issues with existing hardware",
+        milestones: [
+            { name: "System Analysis", dueDate: "2023-12-31", completed: true },
+            { name: "Migration Plan", dueDate: "2024-03-31", completed: true },
+            { name: "Testing Phase", dueDate: "2024-05-31", completed: false },
+            { name: "Final Deployment", dueDate: "2024-06-30", completed: false }
+        ]
+    },
+    {
+        id: 9,
+        name: "Quality Control Improvement",
+        description: "Implementation of advanced quality control measures",
+        projectType: "small",
+        status: "active",
+        startDate: "2024-01-01",
+        endDate: "2024-07-31", // This is overdue
+        progress: 60,
+        teamMembers: ["Maciej", "Hamed"],
+        notes: "Waiting for new equipment delivery to complete implementation",
+        milestones: [
+            { name: "Current State Analysis", dueDate: "2024-02-29", completed: true },
+            { name: "New Procedures Design", dueDate: "2024-05-31", completed: true },
+            { name: "Implementation", dueDate: "2024-07-31", completed: false }
+        ]
+    },
+    // UNSTARTED PROJECTS (to show in "Unstarted Projects" KPI)
+    {
+        id: 10,
+        name: "Next-Gen Materials Research",
+        description: "Research into advanced composite materials for aerospace applications",
+        projectType: "large",
+        status: "active",
+        startDate: "2024-10-01", // Future start date
+        endDate: "2025-08-31",
+        progress: 0,
+        teamMembers: ["Jack", "Ben", "Abdullah"],
+        notes: "Waiting for lab equipment installation and team expansion",
+        milestones: [
+            { name: "Lab Setup", dueDate: "2024-11-30", completed: false },
+            { name: "Initial Testing", dueDate: "2025-02-28", completed: false },
+            { name: "Material Validation", dueDate: "2025-06-30", completed: false },
+            { name: "Final Report", dueDate: "2025-08-31", completed: false }
+        ]
+    },
+    {
+        id: 11,
+        name: "Digital Twin Development",
+        description: "Development of digital twin models for manufacturing processes",
+        projectType: "large",
+        status: "active",
+        startDate: "2024-11-15", // Future start date
+        endDate: "2025-12-31",
+        progress: 0,
+        teamMembers: ["Maciej", "Paul", "Hamed"],
+        notes: "Project approved, waiting for resource allocation",
+        milestones: [
+            { name: "PI Form Completion", dueDate: "2024-12-15", completed: false },
+            { name: "Modeling Framework", dueDate: "2025-04-30", completed: false },
+            { name: "Integration Testing", dueDate: "2025-09-30", completed: false },
+            { name: "Production Deployment", dueDate: "2025-12-31", completed: false }
+        ]
+    },
+    // ADDITIONAL PROJECTS WITH PI FORMS (to show in "PI Forms Completed" KPI)
+    {
+        id: 12,
+        name: "Safety Protocol Enhancement",
+        description: "Enhancement of workplace safety protocols and training programs",
+        projectType: "small",
+        status: "active",
+        startDate: "2024-04-01",
+        endDate: "2024-12-15",
+        progress: 70,
+        teamMembers: ["Abdullah", "Paul"],
+        notes: "New safety protocols showing 25% reduction in incidents",
+        milestones: [
+            { name: "PI Risk Assessment", dueDate: "2024-04-15", completed: true },
+            { name: "Protocol Development", dueDate: "2024-07-31", completed: true },
+            { name: "Training Implementation", dueDate: "2024-10-31", completed: false },
+            { name: "Final Evaluation", dueDate: "2024-12-15", completed: false }
+        ]
+    },
+    {
+        id: 13,
+        name: "Environmental Impact Study",
+        description: "Comprehensive study of environmental impact and sustainability measures",
+        projectType: "small",
+        status: "active",
+        startDate: "2024-05-01",
+        endDate: "2024-11-30",
+        progress: 55,
+        teamMembers: ["Hamed", "Ben"],
+        notes: "Preliminary results show potential for 20% waste reduction",
+        milestones: [
+            { name: "PI Environmental Assessment", dueDate: "2024-05-15", completed: true },
+            { name: "Data Collection", dueDate: "2024-08-31", completed: true },
+            { name: "Impact Analysis", dueDate: "2024-10-31", completed: false },
+            { name: "Recommendations Report", dueDate: "2024-11-30", completed: false }
         ]
     }
 ];
@@ -815,6 +980,7 @@ function updateKPIs() {
     const runningProjects = projects.filter(p => p.status === 'active').length;
     const completedThisYear = projects.filter(p => {
         if (p.status !== 'completed') return false;
+        // Use completedDate if available, otherwise use endDate
         const completedDate = new Date(p.completedDate || p.endDate);
         const currentYear = new Date().getFullYear();
         return completedDate.getFullYear() === currentYear;
@@ -895,6 +1061,35 @@ function resetData() {
         initializeDashboard();
         showNotification('Data reset to default sample projects', 'success');
     }
+}
+
+// Notification system for user feedback
+function showNotification(message, type = 'info') {
+    // Simple notification - can be enhanced with a proper notification library later
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#3498db'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 10000;
+        font-family: Inter, sans-serif;
+        max-width: 300px;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 4 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 4000);
 }
 
 // Future: Real-time updates when database changes
