@@ -108,7 +108,7 @@ log_message "✅ Chromium started with PID: $CHROMIUM_PID"
 # Monitor the browser process and restart if it crashes
 while true; do
     # Check if any chromium process is running (more reliable than checking single PID)
-    if ! pgrep -f "chromium-browser.*$DASHBOARD_URL" > /dev/null; then
+    if ! pgrep -f "/usr/lib/chromium/chromium.*--kiosk" > /dev/null; then
         log_message "❌ Chromium not running, restarting in 5 seconds..."
         sleep 5
 
