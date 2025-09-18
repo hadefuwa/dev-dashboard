@@ -239,6 +239,81 @@ const sampleProjects = [
             { name: "Impact Analysis", dueDate: "2024-10-31", completed: false },
             { name: "Recommendations Report", dueDate: "2024-11-30", completed: false }
         ]
+    },
+    // NEW PROJECTS REQUESTED
+    {
+        id: 14,
+        name: "Wind Tunnel",
+        description: "Design and construction of advanced wind tunnel facility for aerodynamic testing",
+        projectType: "large",
+        status: "active",
+        startDate: "2024-03-01",
+        endDate: "2025-06-30",
+        progress: 35,
+        teamMembers: ["Jack", "Ben", "Maciej", "Paul"],
+        notes: "Subsonic wind tunnel with 2m x 1.5m test section, max speed 80 m/s. Critical for aerospace component testing.",
+        milestones: [
+            { name: "Design Phase", dueDate: "2024-06-30", completed: true },
+            { name: "Foundation Construction", dueDate: "2024-09-30", completed: true },
+            { name: "Fan System Installation", dueDate: "2024-12-31", completed: false },
+            { name: "Calibration & Testing", dueDate: "2025-03-31", completed: false },
+            { name: "Facility Commissioning", dueDate: "2025-06-30", completed: false }
+        ]
+    },
+    {
+        id: 15,
+        name: "Smart Factory 2",
+        description: "Next generation smart manufacturing system with AI-driven production optimization",
+        projectType: "large",
+        status: "active",
+        startDate: "2024-06-01",
+        endDate: "2025-11-30",
+        progress: 25,
+        teamMembers: ["Abdullah", "Hamed", "Paul", "Ben"],
+        notes: "Industry 4.0 implementation with IoT sensors, digital twins, and predictive maintenance across entire production line.",
+        milestones: [
+            { name: "System Architecture Design", dueDate: "2024-08-31", completed: true },
+            { name: "IoT Sensor Deployment", dueDate: "2024-11-30", completed: false },
+            { name: "AI Algorithm Development", dueDate: "2025-03-31", completed: false },
+            { name: "Integration Testing", dueDate: "2025-08-31", completed: false },
+            { name: "Full Production Rollout", dueDate: "2025-11-30", completed: false }
+        ]
+    },
+    {
+        id: 16,
+        name: "AU0205 HMI",
+        description: "Human Machine Interface development for AU0205 control system upgrade",
+        projectType: "small",
+        status: "active",
+        startDate: "2024-07-15",
+        endDate: "2024-12-20",
+        progress: 60,
+        teamMembers: ["Maciej", "Hamed"],
+        notes: "Touch screen interface replacement for legacy AU0205 system. Improved operator experience and diagnostic capabilities.",
+        milestones: [
+            { name: "Requirements Analysis", dueDate: "2024-08-15", completed: true },
+            { name: "UI/UX Design", dueDate: "2024-09-30", completed: true },
+            { name: "Software Development", dueDate: "2024-11-15", completed: false },
+            { name: "System Integration", dueDate: "2024-12-20", completed: false }
+        ]
+    },
+    {
+        id: 17,
+        name: "EM Test Jig",
+        description: "Electromagnetic compatibility test jig for electronic component validation",
+        projectType: "small",
+        status: "active",
+        startDate: "2024-08-01",
+        endDate: "2025-01-31",
+        progress: 40,
+        teamMembers: ["Jack", "Abdullah"],
+        notes: "Custom test fixture for EMC compliance testing per IEC 61000 standards. Supports frequency range 10 kHz to 40 GHz.",
+        milestones: [
+            { name: "Mechanical Design", dueDate: "2024-09-30", completed: true },
+            { name: "Electrical Integration", dueDate: "2024-11-30", completed: false },
+            { name: "Calibration & Validation", dueDate: "2025-01-15", completed: false },
+            { name: "Documentation Complete", dueDate: "2025-01-31", completed: false }
+        ]
     }
 ];
 
@@ -258,6 +333,12 @@ async function initializeDashboard() {
     const projects = await loadProjects();
     displayProjects(projects);
     updateKPIs();
+    
+    // Enable horizontal scrolling animation
+    enableProjectScrolling();
+    
+    // Add navigation arrows (optional - can be removed if not wanted)
+    addScrollNavigation();
 }
 
 // Setup event listeners
@@ -1090,6 +1171,105 @@ function showNotification(message, type = 'info') {
             notification.parentNode.removeChild(notification);
         }
     }, 4000);
+}
+
+// Enable horizontal scrolling animation for project grids
+function enableProjectScrolling() {
+    const projectGrids = document.querySelectorAll('.projects-grid');
+    
+    projectGrids.forEach(grid => {
+        // Add auto-scroll class for animation
+        grid.classList.add('auto-scroll');
+        
+        // Pause animation when user manually scrolls
+        let scrollTimeout;
+        grid.addEventListener('scroll', function() {
+            grid.classList.remove('auto-scroll');
+            
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                grid.classList.add('auto-scroll');
+            }, 3000); // Resume animation after 3 seconds of no manual scrolling
+        });
+        
+        // Pause animation on mouse enter, resume on mouse leave
+        grid.addEventListener('mouseenter', function() {
+            this.style.animationPlayState = 'paused';
+        });
+        
+        grid.addEventListener('mouseleave', function() {
+            this.style.animationPlayState = 'running';
+        });
+    });
+}
+
+// Add navigation arrows for better UX (optional enhancement)
+function addScrollNavigation() {
+    const sections = document.querySelectorAll('.large-projects-section, .small-projects-section');
+    
+    sections.forEach(section => {
+        const grid = section.querySelector('.projects-grid');
+        if (!grid) return;
+        
+        // Create navigation container
+        const navContainer = document.createElement('div');
+        navContainer.style.cssText = `
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        `;
+        
+        // Create left arrow
+        const leftArrow = document.createElement('button');
+        leftArrow.innerHTML = '←';
+        leftArrow.style.cssText = `
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: #6366f1;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        `;
+        
+        // Create right arrow
+        const rightArrow = document.createElement('button');
+        rightArrow.innerHTML = '→';
+        rightArrow.style.cssText = leftArrow.style.cssText;
+        
+        // Add hover effects
+        [leftArrow, rightArrow].forEach(arrow => {
+            arrow.addEventListener('mouseenter', function() {
+                this.style.background = 'rgba(99, 102, 241, 0.4)';
+                this.style.transform = 'scale(1.1)';
+            });
+            
+            arrow.addEventListener('mouseleave', function() {
+                this.style.background = 'rgba(99, 102, 241, 0.2)';
+                this.style.transform = 'scale(1)';
+            });
+        });
+        
+        // Add click functionality
+        leftArrow.addEventListener('click', () => {
+            grid.scrollBy({ left: -370, behavior: 'smooth' });
+        });
+        
+        rightArrow.addEventListener('click', () => {
+            grid.scrollBy({ left: 370, behavior: 'smooth' });
+        });
+        
+        // Insert navigation
+        const header = section.querySelector('.section-header');
+        if (header) {
+            navContainer.appendChild(leftArrow);
+            navContainer.appendChild(rightArrow);
+            header.parentNode.insertBefore(navContainer, grid);
+        }
+    });
 }
 
 // Future: Real-time updates when database changes
