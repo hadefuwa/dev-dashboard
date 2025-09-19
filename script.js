@@ -682,8 +682,14 @@ function handleFileImport(event) {
     }
 }
 
-// Try to auto-load the local Excel file
+// Try to auto-load the local Excel file (only works locally, not on GitHub Pages)
 async function tryAutoLoadExcelFile() {
+    // Only attempt auto-loading if we're running locally (file:// protocol)
+    if (window.location.protocol !== 'file:') {
+        console.log('Auto-loading disabled for web deployment - use manual import instead');
+        return false;
+    }
+    
     try {
         // Attempt to fetch the local Excel file
         const response = await fetch('./R&D Project Management .xlsx');
