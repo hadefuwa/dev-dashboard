@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R&D Task Dashboard - Reports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="reports.css">
+</head>
+<body>
+    <!-- Main gradient background with hexagonal pattern -->
+    <div class="hex-pattern"></div>
+    
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="dashboard-title">
+                    <span class="title-text">
+                        <span class="title-letter">R</span>
+                        <span class="title-letter">&</span>
+                        <span class="title-letter">D</span>
+                        <span class="title-space">&nbsp;</span>
+                        <span class="title-letter">R</span>
+                        <span class="title-letter">e</span>
+                        <span class="title-letter">p</span>
+                        <span class="title-letter">o</span>
+                        <span class="title-letter">r</span>
+                        <span class="title-letter">t</span>
+                        <span class="title-letter">s</span>
+                    </span>
+                    <div class="title-glow"></div>
+                    <div class="title-particles"></div>
+                </h1>
+            </div>
+            <div class="header-right">
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="window.location.href='index.html'">← Back to Dashboard</button>
+                </div>
+                <div class="logo-container">
+                    <img src="matrix-logo.png" alt="Matrix Logo" class="matrix-logo">
+                </div>
+            </div>
+        </header>
+
+        <!-- Reports Content -->
+        <section class="reports-content">
+            <div class="reports-grid">
+                <!-- Summary Cards -->
+                <div class="report-card summary-card">
+                    <h2>📊 Task Summary</h2>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-tasks-report">0</div>
+                            <div class="stat-label">Total Tasks</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="completed-tasks-report">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="in-progress-report">0</div>
+                            <div class="stat-label">In Progress</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="completion-rate">0%</div>
+                            <div class="stat-label">Completion Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Priority Breakdown -->
+                <div class="report-card">
+                    <h2>🎯 Priority Breakdown</h2>
+                    <div class="priority-chart" id="priority-chart">
+                        <!-- Priority chart will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Status Distribution -->
+                <div class="report-card">
+                    <h2>📈 Status Distribution</h2>
+                    <div class="status-chart" id="status-chart">
+                        <!-- Status chart will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Bucket Analysis -->
+                <div class="report-card">
+                    <h2>🗂️ Bucket Analysis</h2>
+                    <div class="bucket-list" id="bucket-list">
+                        <!-- Bucket analysis will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Team Performance -->
+                <div class="report-card">
+                    <h2>👥 Team Performance</h2>
+                    <div class="team-stats" id="team-stats">
+                        <!-- Team statistics will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Timeline Analysis -->
+                <div class="report-card timeline-card">
+                    <h2>📅 Timeline Analysis</h2>
+                    <div class="timeline-stats">
+                        <div class="timeline-item">
+                            <div class="timeline-label">Overdue Tasks</div>
+                            <div class="timeline-number" id="overdue-count">0</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-label">Due This Week</div>
+                            <div class="timeline-number" id="due-this-week">0</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-label">Due Next Week</div>
+                            <div class="timeline-number" id="due-next-week">0</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-label">No Due Date</div>
+                            <div class="timeline-number" id="no-due-date">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="report-card activity-card">
+                    <h2>🔄 Recent Activity</h2>
+                    <div class="activity-list" id="activity-list">
+                        <!-- Recent activity will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="data.js"></script>
+    <script src="reports.js"></script>
+</body>
+</html>

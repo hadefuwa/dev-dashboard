@@ -399,40 +399,47 @@ function createTaskCard(task) {
     
     // Format dates
     const dueDate = task.dueDate ? formatDate(task.dueDate) : 'No due date';
-    const createdDate = task.createdDate ? formatDate(task.createdDate) : '';
+    
+    // Calculate completion percentage based on bucket
+    const completionPercentage = getCompletionPercentage(task.bucketName);
     
     card.innerHTML = `
+        ${completionPercentage !== null ? `
+        <div class="card-progress-bar" style="--progress: ${completionPercentage}%">
+            <div class="card-progress-fill"></div>
+        </div>
+        ` : ''}
+        
         <div class="task-header">
             <div class="task-title">${task.taskName}</div>
             <div class="task-status ${statusClass}">${statusText}</div>
         </div>
         
-        ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
         
         <div class="task-bucket">
             <span class="bucket-label">Bucket:</span>
             <span class="bucket-name">${task.bucketName}</span>
         </div>
         
+        ${completionPercentage !== null ? `
+        <div class="task-progress-text">
+            <span class="progress-text">Progress: ${completionPercentage}%</span>
+        </div>
+        ` : ''}
+        
         <div class="task-priority priority-${priorityClass}">
             Priority: ${task.priority}
-        </div>
+            </div>
         
         <div class="task-assignment">
             <span class="assigned-label">Assigned to:</span>
             <span class="assigned-to">${task.assignedTo || 'Unassigned'}</span>
         </div>
         
-        <div class="task-dates">
-            <div class="task-date">
-                <span class="date-label">Created:</span>
-                <span class="date-value">${createdDate}</span>
-            </div>
-            <div class="task-date">
-                <span class="date-label">Due:</span>
-                <span class="date-value ${isLate ? 'late' : ''}">${dueDate}</span>
-                ${lateIndicator}
-            </div>
+        <div class="task-due-date">
+            <span class="due-label">Due:</span>
+            <span class="due-value ${isLate ? 'late' : ''}">${dueDate}</span>
+            ${lateIndicator}
         </div>
         
         ${task.checklistItems ? `
@@ -449,15 +456,38 @@ function createTaskCard(task) {
         <div class="task-labels">
             <span class="labels-label">Labels:</span>
             <span class="labels-text">${task.labels}</span>
-        </div>
+                </div>
         ` : ''}
         
-        <div class="task-actions">
-            <button class="action-btn view" onclick="viewTaskDetails('${task.taskId}')">View Details</button>
-        </div>
     `;
     
     return card;
+}
+
+// Get completion percentage based on bucket name
+function getCompletionPercentage(bucketName) {
+    if (!bucketName) return null;
+    
+    const bucket = bucketName.toLowerCase();
+    
+    // Check for N/A cases first
+    if (bucket.includes('production based') || bucket.includes('in house')) {
+        return null; // N/A - don't show progress bar
+    }
+    
+    // Map bucket names to completion percentages
+    if (bucket.includes('all potential') || bucket.includes('potential')) {
+        return 0;
+    } else if (bucket.includes('research')) {
+        return 10;
+    } else if (bucket.includes('in progress') || bucket.includes('progress')) {
+        return 30;
+    } else if (bucket.includes('production handover') || bucket.includes('handover')) {
+        return 80;
+    }
+    
+    // Default fallback
+    return null;
 }
 
 // Format date for display
@@ -597,14 +627,14 @@ function exportToExcel(tasks) {
 // Export to CSV format (fallback)
 function exportToCSV(tasks) {
     const csvContent = DataUtils.exportToCSV(tasks);
-    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const csvUrl = URL.createObjectURL(csvBlob);
-    const csvLink = document.createElement('a');
-    csvLink.href = csvUrl;
+        const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const csvUrl = URL.createObjectURL(csvBlob);
+        const csvLink = document.createElement('a');
+        csvLink.href = csvUrl;
     csvLink.download = `rd-dashboard-tasks-${new Date().toISOString().split('T')[0]}.csv`;
-    csvLink.click();
-    URL.revokeObjectURL(csvUrl);
-    
+        csvLink.click();
+        URL.revokeObjectURL(csvUrl);
+        
     showNotification('Data exported to CSV format! You can now edit it in Excel and import it back.', 'success');
 }
 
@@ -623,16 +653,16 @@ function handleFileImport(event) {
     
     if (fileExtension === 'csv') {
         // Handle CSV files
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const content = e.target.result;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const content = e.target.result;
                 importFromCSV(content);
-            } catch (error) {
-                showNotification(`Import failed: ${error.message}`, 'error');
-            }
-        };
-        reader.readAsText(file);
+        } catch (error) {
+            showNotification(`Import failed: ${error.message}`, 'error');
+        }
+    };
+    reader.readAsText(file);
     } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
         // Handle Excel files
         const reader = new FileReader();
@@ -729,13 +759,8 @@ function importFromCSV(csvContent) {
 
 // Reports Functions
 function showReports() {
-    const modal = document.getElementById('reports-modal');
-    modal.style.display = 'block';
-    generateReports();
-}
-
-function hideReports() {
-    document.getElementById('reports-modal').style.display = 'none';
+    // Navigate to the reports page
+    window.location.href = 'reports.html';
 }
 
 function generateReports() {
@@ -1008,7 +1033,7 @@ function updateKPIs() {
         document.getElementById('kpi-completed-tasks').textContent = '0';
         document.getElementById('kpi-overdue-tasks').textContent = '0';
         document.getElementById('kpi-urgent-tasks').textContent = '0';
-        document.getElementById('kpi-urgent').textContent = '0';
+        document.getElementById('kpi-not-started').textContent = '0';
         return;
     }
     
@@ -1040,8 +1065,10 @@ function updateKPIs() {
         task.priority === 'Urgent'
     ).length;
     
-    // Count urgent tasks (same as urgent priority for consistency)
-    const urgent = urgentTasks;
+    // Count not started tasks
+    const notStartedTasks = tasks.filter(task => 
+        task.progress === 'Not started'
+    ).length;
     
     // Update KPI displays
     document.getElementById('kpi-total-tasks').textContent = totalTasks;
@@ -1049,7 +1076,7 @@ function updateKPIs() {
     document.getElementById('kpi-completed-tasks').textContent = completedTasks;
     document.getElementById('kpi-overdue-tasks').textContent = overdueTasks;
     document.getElementById('kpi-urgent-tasks').textContent = urgentTasks;
-    document.getElementById('kpi-urgent').textContent = urgent;
+    document.getElementById('kpi-not-started').textContent = notStartedTasks;
     
     // Add animation effect
     animateKPIUpdates();
@@ -1149,10 +1176,10 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         if (notification.parentNode) {
             notification.style.animation = 'slideInNotification 0.3s ease-out reverse';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
             }, 300);
         }
     }, timeout);
