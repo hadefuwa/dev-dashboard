@@ -34,7 +34,7 @@ body {
 .header {
     position: relative;
     z-index: 1;
-    padding: 24px 32px;
+    padding: 16px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -58,7 +58,7 @@ body {
 /* Complex Animated Dashboard Title */
 .dashboard-title {
     position: relative;
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     letter-spacing: -0.025em;
     margin: 0;
@@ -256,6 +256,83 @@ body {
     }
 }
 
+
+/* Kiosk Mode Task Card */
+.task-card.kiosk-mode {
+    max-width: 800px;
+    margin: 0 auto;
+    transform: scale(1.05);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(99, 102, 241, 0.3);
+}
+
+.task-card.kiosk-mode .task-header {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.task-card.kiosk-mode .task-title {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.task-card.kiosk-mode .task-status {
+    font-size: 1.2rem;
+    padding: 8px 16px;
+}
+
+.task-card.kiosk-mode .task-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.task-card.kiosk-mode .task-bucket,
+.task-card.kiosk-mode .task-priority,
+.task-card.kiosk-mode .task-assignment,
+.task-card.kiosk-mode .task-dates {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+/* Hide filter buttons in kiosk mode */
+.kiosk-mode-active .filter-section {
+    display: none;
+}
+
+/* Fullscreen kiosk mode */
+.kiosk-mode-active {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10000;
+    background: #0a0b1e;
+    overflow: hidden;
+}
+
+.kiosk-mode-active .header {
+    position: relative;
+    z-index: 10001;
+}
+
+.kiosk-mode-active .kpi-section {
+    position: relative;
+    z-index: 10001;
+}
+
+.kiosk-mode-active .projects-section {
+    position: relative;
+    z-index: 10001;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 200px);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .dashboard-title {
@@ -268,6 +345,26 @@ body {
     
     .title-glow {
         filter: blur(15px);
+    }
+    
+    .rotation-info {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .rotation-controls-buttons {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .task-card.kiosk-mode {
+        margin: 0 20px;
+        transform: scale(1);
+    }
+    
+    .task-card.kiosk-mode .task-title {
+        font-size: 1.5rem;
     }
 }
 
@@ -485,21 +582,35 @@ body {
 /* Projects Grid - Beautiful Task Layout */
 .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-    gap: 24px;
-    padding: 20px 0;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+    min-height: 400px;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
     .projects-grid {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (max-width: 1000px) {
+    .projects-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
         gap: 20px;
     }
 }
 
 @media (max-width: 768px) {
     .projects-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
         gap: 16px;
         padding: 16px 0;
     }

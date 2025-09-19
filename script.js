@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
     setupEventListeners();
     setupTitleAnimation();
+    startAutoRefresh();
 });
 
 // Initialize dashboard (starts empty, ready for import)
@@ -19,6 +20,11 @@ async function initializeDashboard() {
     const tasks = await loadTasks();
     displayTasks(tasks);
     updateKPIs();
+    
+    // Start auto-rotation if tasks exist
+    if (tasks && tasks.length > 0) {
+        startAutoRotation(tasks);
+    }
 }
 
 // Setup complex title animation
@@ -155,20 +161,120 @@ function createFloatingParticles() {
     title.appendChild(particleContainer);
 }
 
+// Auto-rotation system for kiosk mode
+let currentTaskIndex = 0;
+let rotationInterval = null;
+let rotationSpeed = 20000; // 20 seconds per task
+
+function startAutoRotation(tasks) {
+    // Clear any existing rotation
+    stopAutoRotation();
+    
+    // Show 6 tasks at a time
+    displayTaskSet(tasks, 0);
+    
+    // Start the rotation timer
+    rotationInterval = setInterval(() => {
+        currentTaskIndex = (currentTaskIndex + 6) % tasks.length;
+        displayTaskSet(tasks, currentTaskIndex);
+    }, rotationSpeed);
+}
+
+function stopAutoRotation() {
+    if (rotationInterval) {
+        clearInterval(rotationInterval);
+        rotationInterval = null;
+    }
+}
+
+function displayTaskSet(tasks, startIndex) {
+    const projectsGrid = document.getElementById('projects-grid');
+    
+    if (!tasks || tasks.length === 0) {
+        projectsGrid.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <h3>No Tasks Found</h3>
+                <p>Your dashboard is empty and ready for your Teams Planner data!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Clear grid
+    projectsGrid.innerHTML = '';
+    
+    // Show 6 tasks starting from the current index
+    for (let i = 0; i < 6; i++) {
+        const taskIndex = (startIndex + i) % tasks.length;
+        const task = tasks[taskIndex];
+        
+        if (task) {
+            const taskCard = createTaskCard(task);
+            taskCard.style.opacity = '0';
+            taskCard.style.transform = 'translateY(20px)';
+            projectsGrid.appendChild(taskCard);
+            
+            // Staggered animation for each card
+            setTimeout(() => {
+                taskCard.style.transition = 'all 0.5s ease-out';
+                taskCard.style.opacity = '1';
+                taskCard.style.transform = 'translateY(0)';
+            }, i * 100);
+        }
+    }
+}
+
+
+// Kiosk Mode Toggle
+function toggleKioskMode() {
+    const body = document.body;
+    const isKioskMode = body.classList.contains('kiosk-mode-active');
+    
+    if (isKioskMode) {
+        // Exit kiosk mode
+        body.classList.remove('kiosk-mode-active');
+        document.exitFullscreen?.();
+        showNotification('Exited Kiosk Mode', 'info');
+    } else {
+        // Enter kiosk mode
+        body.classList.add('kiosk-mode-active');
+        
+        // Try to enter fullscreen
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) {
+            document.documentElement.msRequestFullscreen();
+        }
+        
+        showNotification('Entered Kiosk Mode - Auto-rotating through tasks', 'success');
+        
+        // Start auto-rotation if not already running
+        const tasks = getTasks();
+        if (tasks.length > 0 && !rotationInterval) {
+            startAutoRotation(tasks);
+        }
+    }
+}
+
+// Auto-refresh data every 5 minutes
+function startAutoRefresh() {
+    setInterval(async () => {
+        const tasks = await loadTasks();
+        if (tasks.length > 0) {
+            // Update display if rotation is active
+            if (rotationInterval) {
+                displaySingleTask(tasks, currentTaskIndex);
+                updateKPIs();
+            }
+        }
+    }, 5 * 60 * 1000); // 5 minutes
+}
+
 // Setup event listeners
 function setupEventListeners() {
-    // Filter buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Remove active class from all buttons
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            // Add active class to clicked button
-            this.classList.add('active');
-            // Apply filter
-            applyFilter(this.dataset.filter);
-        });
-    });
-    
     // Close modals when clicking outside
     window.addEventListener('click', function(event) {
         const detailsModal = document.getElementById('project-details-modal');
@@ -382,29 +488,6 @@ function hideProjectDetails() {
 }
 
 
-// Apply filter
-function applyFilter(filter) {
-    const tasks = JSON.parse(localStorage.getItem('rdTasks') || '[]');
-    let filteredTasks = tasks;
-    
-    switch(filter) {
-        case 'active':
-            filteredTasks = tasks.filter(t => t.progress === 'In progress');
-            break;
-        case 'completed':
-            filteredTasks = tasks.filter(t => t.progress === 'Completed');
-            break;
-        case 'not-started':
-            filteredTasks = tasks.filter(t => t.progress === 'Not started');
-            break;
-        case 'all':
-        default:
-            filteredTasks = tasks;
-            break;
-    }
-    
-    displayTasks(filteredTasks);
-}
 
 // Enhanced export data with multiple formats
 // Export data function
@@ -588,7 +671,12 @@ function importFromCSV(csvContent) {
             // Refresh dashboard with new data
             initializeDashboard();
             
-            const message = `Successfully imported ${importedTasks.length} tasks from Teams Planner!`;
+            // Start auto-rotation with new data
+            if (importedTasks.length > 0) {
+                startAutoRotation(importedTasks);
+            }
+            
+            const message = `Successfully imported ${importedTasks.length} tasks from Teams Planner! Auto-rotation started.`;
             showNotification(message, 'success');
         }
         

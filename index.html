@@ -43,6 +43,7 @@
         </div>
         <div class="header-right">
             <div class="header-actions">
+                <button class="btn btn-secondary" onclick="toggleKioskMode()">🖥️ Kiosk Mode</button>
                 <button class="btn btn-secondary" onclick="showReports()">Reports</button>
                 <button class="btn btn-secondary" onclick="exportData()">Export to Excel</button>
                 <button class="btn btn-primary" onclick="importData()">Import from Teams Planner</button>
@@ -79,19 +80,9 @@
         </div>
     </section>
 
-    <!-- Filter Options -->
-    <div class="filter-section">
-        <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all">All Tasks</button>
-            <button class="filter-btn" data-filter="active">In Progress</button>
-            <button class="filter-btn" data-filter="completed">Completed</button>
-            <button class="filter-btn" data-filter="not-started">Not Started</button>
-        </div>
-    </div>
 
     <!-- Tasks Section -->
     <section class="projects-section">
-        <h2 class="section-header">Tasks</h2>
         <div class="projects-grid" id="projects-grid">
             <!-- All tasks will be loaded here -->
         </div>
