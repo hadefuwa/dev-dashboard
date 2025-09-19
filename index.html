@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R&D Dashboard</title>
+    <title>R&D Task Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,14 +16,36 @@
     <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <h1 class="dashboard-title">R&D Dashboard</h1>
+            <h1 class="dashboard-title">
+                <span class="title-text">
+                    <span class="title-letter">R</span>
+                    <span class="title-letter">&</span>
+                    <span class="title-letter">D</span>
+                    <span class="title-space">&nbsp;</span>
+                    <span class="title-letter">T</span>
+                    <span class="title-letter">a</span>
+                    <span class="title-letter">s</span>
+                    <span class="title-letter">k</span>
+                    <span class="title-space">&nbsp;</span>
+                    <span class="title-letter">D</span>
+                    <span class="title-letter">a</span>
+                    <span class="title-letter">s</span>
+                    <span class="title-letter">h</span>
+                    <span class="title-letter">b</span>
+                    <span class="title-letter">o</span>
+                    <span class="title-letter">a</span>
+                    <span class="title-letter">r</span>
+                    <span class="title-letter">d</span>
+                </span>
+                <div class="title-glow"></div>
+                <div class="title-particles"></div>
+            </h1>
         </div>
         <div class="header-right">
             <div class="header-actions">
-                <button class="btn btn-primary" onclick="showAddProjectForm()">Add New Project</button>
                 <button class="btn btn-secondary" onclick="showReports()">Reports</button>
                 <button class="btn btn-secondary" onclick="exportData()">Export to Excel</button>
-                <button class="btn btn-secondary" onclick="importData()">Import from Excel</button>
+                <button class="btn btn-primary" onclick="importData()">Import from Teams Planner</button>
             </div>
             <div class="logo-container">
                 <img src="matrix-logo.png" alt="Matrix Logo" class="matrix-logo">
@@ -35,24 +57,24 @@
     <section class="kpi-section">
         <div class="kpi-container">
             <div class="kpi-card">
-                <div class="kpi-number" id="kpi-running-projects">0</div>
-                <div class="kpi-label">Running Projects</div>
+                <div class="kpi-number" id="kpi-total-tasks">0</div>
+                <div class="kpi-label">Total Tasks</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-number" id="kpi-completed-this-year">0</div>
-                <div class="kpi-label">Completed This Year</div>
+                <div class="kpi-number" id="kpi-in-progress">0</div>
+                <div class="kpi-label">In Progress</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-number" id="kpi-overdue-projects">0</div>
-                <div class="kpi-label">Overdue Projects</div>
+                <div class="kpi-number" id="kpi-completed-tasks">0</div>
+                <div class="kpi-label">Completed</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-number" id="kpi-unstarted-projects">0</div>
-                <div class="kpi-label">Unstarted Projects</div>
+                <div class="kpi-number" id="kpi-overdue-tasks">0</div>
+                <div class="kpi-label">Overdue Tasks</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-number" id="kpi-pi-forms-completed">0</div>
-                <div class="kpi-label">PI Forms Completed</div>
+                <div class="kpi-number" id="kpi-urgent-tasks">0</div>
+                <div class="kpi-label">Urgent Priority</div>
             </div>
         </div>
     </section>
@@ -60,115 +82,21 @@
     <!-- Filter Options -->
     <div class="filter-section">
         <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all">All Projects</button>
-            <button class="filter-btn" data-filter="large">Large Projects</button>
-            <button class="filter-btn" data-filter="small">Small Projects</button>
-            <button class="filter-btn" data-filter="active">Active</button>
+            <button class="filter-btn active" data-filter="all">All Tasks</button>
+            <button class="filter-btn" data-filter="active">In Progress</button>
             <button class="filter-btn" data-filter="completed">Completed</button>
+            <button class="filter-btn" data-filter="not-started">Not Started</button>
         </div>
     </div>
 
-    <!-- Large Projects Section -->
-    <section class="large-projects-section">
-        <h2 class="section-header">Large Projects</h2>
-        <div class="projects-grid" id="large-projects-grid">
-            <!-- Large projects will be loaded here -->
+    <!-- Tasks Section -->
+    <section class="projects-section">
+        <h2 class="section-header">Tasks</h2>
+        <div class="projects-grid" id="projects-grid">
+            <!-- All tasks will be loaded here -->
         </div>
     </section>
 
-    <!-- Small Projects Section -->
-    <section class="small-projects-section">
-        <h2 class="section-header">Small Projects</h2>
-        <div class="projects-grid" id="small-projects-grid">
-            <!-- Small projects will be loaded here -->
-        </div>
-    </section>
-
-    <!-- Add Project Form Modal -->
-    <div id="project-form-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add New Project</h2>
-                <span class="close" onclick="hideAddProjectForm()">&times;</span>
-            </div>
-            <form id="project-form" class="project-form">
-                <div class="form-group">
-                    <label for="project-name">Project Name</label>
-                    <input type="text" id="project-name" name="name" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="project-description">Description</label>
-                    <textarea id="project-description" name="description" rows="3"></textarea>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="project-type">Project Type</label>
-                        <select id="project-type" name="projectType" required>
-                            <option value="">Select Type</option>
-                            <option value="large">Large Project</option>
-                            <option value="small">Small Project</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="project-status">Status</label>
-                        <select id="project-status" name="status" required>
-                            <option value="active">Active</option>
-                            <option value="paused">Paused</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="start-date">Start Date</label>
-                        <input type="date" id="start-date" name="startDate" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="end-date">End Date</label>
-                        <input type="date" id="end-date" name="endDate" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="progress">Progress (%)</label>
-                    <input type="range" id="progress" name="progress" min="0" max="100" value="0">
-                    <span id="progress-value">0%</span>
-                </div>
-                
-                <div class="form-group">
-                    <label for="team-members">Team Members (comma-separated)</label>
-                    <input type="text" id="team-members" name="teamMembers" placeholder="Jack, Ben, Maciej, Abdullah, Paul, Hamed">
-                </div>
-                
-                <div class="form-group">
-                    <label>Milestones</label>
-                    <div id="milestones-container">
-                        <div class="milestone-item">
-                            <input type="text" name="milestone-name" placeholder="Milestone name" class="milestone-input">
-                            <input type="date" name="milestone-date" class="milestone-date">
-                            <button type="button" class="btn-remove-milestone" onclick="removeMilestone(this)">×</button>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-secondary btn-small" onclick="addMilestone()">Add Milestone</button>
-                </div>
-                
-                <div class="form-group">
-                    <label for="notes">Notes</label>
-                    <textarea id="notes" name="notes" rows="3"></textarea>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="hideAddProjectForm()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Project</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <!-- Project Details Modal -->
     <div id="project-details-modal" class="modal">
@@ -233,7 +161,10 @@
     <!-- Hidden file input for import -->
     <input type="file" id="import-file-input" accept=".csv,.xlsx,.xls" style="display: none;" onchange="handleFileImport(event)">
 
+    <!-- Excel file parsing library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
+

@@ -3,354 +3,26 @@
 // Options: JSONBin.io, Firebase, or Supabase for shared data storage
 // For now, using LocalStorage for development/testing
 
-// Sample data with more projects to populate KPIs with realistic numbers
-const sampleProjects = [
-    {
-        id: 1,
-        name: "Thermal Dynamics",
-        description: "Advanced thermal analysis and optimization research for industrial applications",
-        projectType: "large",
-        status: "active",
-        startDate: "2024-01-15",
-        endDate: "2024-12-31",
-        progress: 65,
-        teamMembers: ["Jack", "Ben", "Maciej"],
-        notes: "Focus on heat transfer optimization and energy efficiency improvements",
-        milestones: [
-            { name: "Initial Research Phase", dueDate: "2024-03-31", completed: true },
-            { name: "Prototype Development", dueDate: "2024-06-30", completed: true },
-            { name: "Testing & Validation", dueDate: "2024-09-30", completed: false },
-            { name: "Final Report", dueDate: "2024-12-31", completed: false }
-        ]
-    },
-    {
-        id: 2,
-        name: "Structures",
-        description: "Structural engineering and material science projects for next-generation construction",
-        projectType: "large",
-        status: "active",
-        startDate: "2024-02-01",
-        endDate: "2024-11-30",
-        progress: 45,
-        teamMembers: ["Abdullah", "Paul", "Hamed"],
-        notes: "Investigating new composite materials and structural integrity testing",
-        milestones: [
-            { name: "Material Analysis", dueDate: "2024-04-30", completed: true },
-            { name: "Design Phase", dueDate: "2024-07-31", completed: false },
-            { name: "Construction Testing", dueDate: "2024-10-31", completed: false }
-        ]
-    },
-    {
-        id: 3,
-        name: "Industrial Maintenance",
-        description: "Maintenance optimization and predictive analytics for industrial equipment",
-        projectType: "large",
-        status: "active",
-        startDate: "2024-07-01",
-        endDate: "2025-10-15",
-        progress: 80,
-        teamMembers: ["Jack", "Abdullah", "Ben"],
-        notes: "Implementing AI-driven predictive maintenance algorithms",
-        milestones: [
-            { name: "Algorithm Development", dueDate: "2024-03-31", completed: true },
-            { name: "System Integration", dueDate: "2024-06-30", completed: true },
-            { name: "Field Testing", dueDate: "2024-09-30", completed: false },
-            { name: "Deployment", dueDate: "2024-10-15", completed: false }
-        ]
-    },
-    {
-        id: 4,
-        name: "Eblocks 3",
-        description: "Next generation electronic building blocks development for modular systems",
-        projectType: "large",
-        status: "paused",
-        startDate: "2023-11-01",
-        endDate: "2024-08-31",
-        progress: 30,
-        teamMembers: ["Maciej", "Paul", "Hamed"],
-        notes: "Currently on hold pending funding approval for next phase",
-        milestones: [
-            { name: "Concept Design", dueDate: "2024-01-31", completed: true },
-            { name: "Component Development", dueDate: "2024-05-31", completed: false },
-            { name: "Integration Testing", dueDate: "2024-08-31", completed: false }
-        ]
-    },
-    // COMPLETED PROJECTS (to show in "Completed This Year" KPI)
-    {
-        id: 5,
-        name: "Smart Sensors Network",
-        description: "Development of wireless sensor network for industrial monitoring",
-        projectType: "large",
-        status: "completed",
-        startDate: "2023-09-01",
-        endDate: "2024-05-15",
-        progress: 100,
-        teamMembers: ["Ben", "Maciej", "Jack"],
-        notes: "Successfully deployed across 3 manufacturing facilities",
-        completedDate: "2024-05-15",
-        milestones: [
-            { name: "PI Form Submission", dueDate: "2023-10-15", completed: true },
-            { name: "Prototype Testing", dueDate: "2024-01-31", completed: true },
-            { name: "Final Deployment", dueDate: "2024-05-15", completed: true }
-        ]
-    },
-    {
-        id: 6,
-        name: "Energy Efficiency Audit",
-        description: "Comprehensive energy audit and optimization recommendations",
-        projectType: "small",
-        status: "completed",
-        startDate: "2024-01-10",
-        endDate: "2024-07-30",
-        progress: 100,
-        teamMembers: ["Abdullah", "Paul"],
-        notes: "Achieved 15% energy reduction across all facilities",
-        completedDate: "2024-07-30",
-        milestones: [
-            { name: "Data Collection", dueDate: "2024-03-15", completed: true },
-            { name: "Analysis Report", dueDate: "2024-06-30", completed: true },
-            { name: "Implementation Plan", dueDate: "2024-07-30", completed: true }
-        ]
-    },
-    {
-        id: 7,
-        name: "Process Automation Study",
-        description: "Analysis of automation opportunities in manufacturing processes",
-        projectType: "small",
-        status: "completed",
-        startDate: "2024-03-01",
-        endDate: "2024-08-15",
-        progress: 100,
-        teamMembers: ["Hamed", "Jack"],
-        notes: "Identified 12 key automation opportunities with ROI projections",
-        completedDate: "2024-08-15",
-        milestones: [
-            { name: "PI Documentation", dueDate: "2024-03-15", completed: true },
-            { name: "Process Mapping", dueDate: "2024-05-30", completed: true },
-            { name: "Final Recommendations", dueDate: "2024-08-15", completed: true }
-        ]
-    },
-    // OVERDUE PROJECTS (to show in "Overdue Projects" KPI)
-    {
-        id: 8,
-        name: "Legacy System Migration",
-        description: "Migration of legacy control systems to modern platforms",
-        projectType: "large",
-        status: "active",
-        startDate: "2023-10-01",
-        endDate: "2024-06-30", // This is overdue
-        progress: 75,
-        teamMembers: ["Paul", "Ben", "Abdullah"],
-        notes: "Delayed due to compatibility issues with existing hardware",
-        milestones: [
-            { name: "System Analysis", dueDate: "2023-12-31", completed: true },
-            { name: "Migration Plan", dueDate: "2024-03-31", completed: true },
-            { name: "Testing Phase", dueDate: "2024-05-31", completed: false },
-            { name: "Final Deployment", dueDate: "2024-06-30", completed: false }
-        ]
-    },
-    {
-        id: 9,
-        name: "Quality Control Improvement",
-        description: "Implementation of advanced quality control measures",
-        projectType: "small",
-        status: "active",
-        startDate: "2024-01-01",
-        endDate: "2024-07-31", // This is overdue
-        progress: 60,
-        teamMembers: ["Maciej", "Hamed"],
-        notes: "Waiting for new equipment delivery to complete implementation",
-        milestones: [
-            { name: "Current State Analysis", dueDate: "2024-02-29", completed: true },
-            { name: "New Procedures Design", dueDate: "2024-05-31", completed: true },
-            { name: "Implementation", dueDate: "2024-07-31", completed: false }
-        ]
-    },
-    // UNSTARTED PROJECTS (to show in "Unstarted Projects" KPI)
-    {
-        id: 10,
-        name: "Next-Gen Materials Research",
-        description: "Research into advanced composite materials for aerospace applications",
-        projectType: "large",
-        status: "active",
-        startDate: "2024-10-01", // Future start date
-        endDate: "2025-08-31",
-        progress: 0,
-        teamMembers: ["Jack", "Ben", "Abdullah"],
-        notes: "Waiting for lab equipment installation and team expansion",
-        milestones: [
-            { name: "Lab Setup", dueDate: "2024-11-30", completed: false },
-            { name: "Initial Testing", dueDate: "2025-02-28", completed: false },
-            { name: "Material Validation", dueDate: "2025-06-30", completed: false },
-            { name: "Final Report", dueDate: "2025-08-31", completed: false }
-        ]
-    },
-    {
-        id: 11,
-        name: "Digital Twin Development",
-        description: "Development of digital twin models for manufacturing processes",
-        projectType: "large",
-        status: "active",
-        startDate: "2024-11-15", // Future start date
-        endDate: "2025-12-31",
-        progress: 0,
-        teamMembers: ["Maciej", "Paul", "Hamed"],
-        notes: "Project approved, waiting for resource allocation",
-        milestones: [
-            { name: "PI Form Completion", dueDate: "2024-12-15", completed: false },
-            { name: "Modeling Framework", dueDate: "2025-04-30", completed: false },
-            { name: "Integration Testing", dueDate: "2025-09-30", completed: false },
-            { name: "Production Deployment", dueDate: "2025-12-31", completed: false }
-        ]
-    },
-    // ADDITIONAL PROJECTS WITH PI FORMS (to show in "PI Forms Completed" KPI)
-    {
-        id: 12,
-        name: "Safety Protocol Enhancement",
-        description: "Enhancement of workplace safety protocols and training programs",
-        projectType: "small",
-        status: "active",
-        startDate: "2024-04-01",
-        endDate: "2024-12-15",
-        progress: 70,
-        teamMembers: ["Abdullah", "Paul"],
-        notes: "New safety protocols showing 25% reduction in incidents",
-        milestones: [
-            { name: "PI Risk Assessment", dueDate: "2024-04-15", completed: true },
-            { name: "Protocol Development", dueDate: "2024-07-31", completed: true },
-            { name: "Training Implementation", dueDate: "2024-10-31", completed: false },
-            { name: "Final Evaluation", dueDate: "2024-12-15", completed: false }
-        ]
-    },
-    {
-        id: 13,
-        name: "Environmental Impact Study",
-        description: "Comprehensive study of environmental impact and sustainability measures",
-        projectType: "small",
-        status: "active",
-        startDate: "2024-05-01",
-        endDate: "2024-11-30",
-        progress: 55,
-        teamMembers: ["Hamed", "Ben"],
-        notes: "Preliminary results show potential for 20% waste reduction",
-        milestones: [
-            { name: "PI Environmental Assessment", dueDate: "2024-05-15", completed: true },
-            { name: "Data Collection", dueDate: "2024-08-31", completed: true },
-            { name: "Impact Analysis", dueDate: "2024-10-31", completed: false },
-            { name: "Recommendations Report", dueDate: "2024-11-30", completed: false }
-        ]
-    },
-    // NEW PROJECTS REQUESTED
-    {
-        id: 14,
-        name: "Wind Tunnel",
-        description: "Design and construction of advanced wind tunnel facility for aerodynamic testing",
-        projectType: "large",
-        status: "active",
-        startDate: "2024-03-01",
-        endDate: "2025-06-30",
-        progress: 35,
-        teamMembers: ["Jack", "Ben", "Maciej", "Paul"],
-        notes: "Subsonic wind tunnel with 2m x 1.5m test section, max speed 80 m/s. Critical for aerospace component testing.",
-        milestones: [
-            { name: "Design Phase", dueDate: "2024-06-30", completed: true },
-            { name: "Foundation Construction", dueDate: "2024-09-30", completed: true },
-            { name: "Fan System Installation", dueDate: "2024-12-31", completed: false },
-            { name: "Calibration & Testing", dueDate: "2025-03-31", completed: false },
-            { name: "Facility Commissioning", dueDate: "2025-06-30", completed: false }
-        ]
-    },
-    {
-        id: 15,
-        name: "Smart Factory 2",
-        description: "Next generation smart manufacturing system with AI-driven production optimization",
-        projectType: "large",
-        status: "active",
-        startDate: "2024-06-01",
-        endDate: "2025-11-30",
-        progress: 25,
-        teamMembers: ["Abdullah", "Hamed", "Paul", "Ben"],
-        notes: "Industry 4.0 implementation with IoT sensors, digital twins, and predictive maintenance across entire production line.",
-        milestones: [
-            { name: "System Architecture Design", dueDate: "2024-08-31", completed: true },
-            { name: "IoT Sensor Deployment", dueDate: "2024-11-30", completed: false },
-            { name: "AI Algorithm Development", dueDate: "2025-03-31", completed: false },
-            { name: "Integration Testing", dueDate: "2025-08-31", completed: false },
-            { name: "Full Production Rollout", dueDate: "2025-11-30", completed: false }
-        ]
-    },
-    {
-        id: 16,
-        name: "AU0205 HMI",
-        description: "Human Machine Interface development for AU0205 control system upgrade",
-        projectType: "small",
-        status: "active",
-        startDate: "2024-07-15",
-        endDate: "2024-12-20",
-        progress: 60,
-        teamMembers: ["Maciej", "Hamed"],
-        notes: "Touch screen interface replacement for legacy AU0205 system. Improved operator experience and diagnostic capabilities.",
-        milestones: [
-            { name: "Requirements Analysis", dueDate: "2024-08-15", completed: true },
-            { name: "UI/UX Design", dueDate: "2024-09-30", completed: true },
-            { name: "Software Development", dueDate: "2024-11-15", completed: false },
-            { name: "System Integration", dueDate: "2024-12-20", completed: false }
-        ]
-    },
-    {
-        id: 17,
-        name: "EM Test Jig",
-        description: "Electromagnetic compatibility test jig for electronic component validation",
-        projectType: "small",
-        status: "active",
-        startDate: "2024-08-01",
-        endDate: "2025-01-31",
-        progress: 40,
-        teamMembers: ["Jack", "Abdullah"],
-        notes: "Custom test fixture for EMC compliance testing per IEC 61000 standards. Supports frequency range 10 kHz to 40 GHz.",
-        milestones: [
-            { name: "Mechanical Design", dueDate: "2024-09-30", completed: true },
-            { name: "Electrical Integration", dueDate: "2024-11-30", completed: false },
-            { name: "Calibration & Validation", dueDate: "2025-01-15", completed: false },
-            { name: "Documentation Complete", dueDate: "2025-01-31", completed: false }
-        ]
-    }
-];
+// No sample data - dashboard starts empty, ready for Teams Planner import
+const sampleProjects = [];
 
 // Initialize the dashboard
 document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
     setupEventListeners();
+    setupTitleAnimation();
 });
 
-// Initialize dashboard with sample data
+// Initialize dashboard (starts empty, ready for import)
 async function initializeDashboard() {
-    // Always load the correct sample projects with proper team members
-    // This ensures team member names are always correct
-    localStorage.setItem('rdProjects', JSON.stringify(sampleProjects));
-    
-    // Load and display projects
-    const projects = await loadProjects();
-    displayProjects(projects);
+    // Load and display tasks
+    const tasks = await loadTasks();
+    displayTasks(tasks);
     updateKPIs();
-    
-    // Enable horizontal scrolling animation
-    enableProjectScrolling();
-    
-    // Add navigation arrows (optional - can be removed if not wanted)
-    addScrollNavigation();
 }
 
 // Setup event listeners
 function setupEventListeners() {
-    // Project form submission
-    document.getElementById('project-form').addEventListener('submit', handleProjectSubmit);
-    
-    // Progress slider
-    document.getElementById('progress').addEventListener('input', function() {
-        document.getElementById('progress-value').textContent = this.value + '%';
-    });
-    
     // Filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -365,129 +37,142 @@ function setupEventListeners() {
     
     // Close modals when clicking outside
     window.addEventListener('click', function(event) {
-        const projectModal = document.getElementById('project-form-modal');
         const detailsModal = document.getElementById('project-details-modal');
         
-        if (event.target === projectModal) {
-            hideAddProjectForm();
-        }
         if (event.target === detailsModal) {
             hideProjectDetails();
         }
     });
 }
 
-// Future: Load all projects from shared database
-async function loadProjects() {
+// Future: Load all tasks from shared database
+async function loadTasks() {
     // TODO: Replace with actual database call
     // For now, load from LocalStorage for development
-    const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
-    return projects; // Return the projects array
+    const tasks = JSON.parse(localStorage.getItem('rdTasks') || '[]');
+    return tasks; // Return the tasks array
 }
 
-// Get projects without displaying them (for export/import)
-function getProjects() {
-    return JSON.parse(localStorage.getItem('rdProjects') || '[]');
+// Get tasks without displaying them (for export/import)
+function getTasks() {
+    return JSON.parse(localStorage.getItem('rdTasks') || '[]');
 }
 
-// Display projects on the dashboard
-function displayProjects(projects) {
-    const largeGrid = document.getElementById('large-projects-grid');
-    const smallGrid = document.getElementById('small-projects-grid');
+// Display tasks on the dashboard
+function displayTasks(tasks) {
+    const projectsGrid = document.getElementById('projects-grid');
     
-    // Clear existing projects
-    largeGrid.innerHTML = '';
-    smallGrid.innerHTML = '';
+    // Clear existing tasks
+    projectsGrid.innerHTML = '';
     
-    // Separate large and small projects
-    const largeProjects = projects.filter(p => p.projectType === 'large');
-    const smallProjects = projects.filter(p => p.projectType === 'small');
     
-    // Display large projects
-    largeProjects.forEach(project => {
-        const projectCard = createProjectCard(project);
-        largeGrid.appendChild(projectCard);
+    // If no tasks, show empty state message
+    if (!tasks || tasks.length === 0) {
+        const emptyMessage = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <h3>No Tasks Found</h3>
+                <p>Your dashboard is empty and ready for your Teams Planner data!</p>
+                <div class="empty-state-actions">
+                    <button class="btn btn-primary" onclick="importData()">Import from Teams Planner</button>
+                </div>
+            </div>
+        `;
+        projectsGrid.innerHTML = emptyMessage;
+        return;
+    }
+    
+    // Display all tasks in unified grid
+    tasks.forEach(task => {
+        const taskCard = createTaskCard(task);
+        projectsGrid.appendChild(taskCard);
     });
-    
-    // Display small projects
-    smallProjects.forEach(project => {
-        const projectCard = createProjectCard(project);
-        smallGrid.appendChild(projectCard);
-    });
 }
 
-// Create a project card element
-function createProjectCard(project) {
+// Create a task card element for Teams Planner tasks
+function createTaskCard(task) {
     const card = document.createElement('div');
-    card.className = `project-card ${project.projectType}`;
     
-    // Calculate days remaining
-    const endDate = new Date(project.endDate);
-    const today = new Date();
-    const daysRemaining = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+    // Determine task status and styling
+    let statusClass = 'not-started';
+    let statusText = 'Not Started';
+    
+    if (task.progress === 'Completed') {
+        statusClass = 'completed';
+        statusText = 'Completed';
+    } else if (task.progress === 'In progress') {
+        statusClass = 'active';
+        statusText = 'In Progress';
+    }
+    
+    // Determine priority styling
+    let priorityClass = 'medium';
+    if (task.priority === 'Urgent') priorityClass = 'urgent';
+    else if (task.priority === 'Low') priorityClass = 'low';
+    
+    card.className = `task-card ${statusClass}`;
+    
+    // Calculate if task is late
+    const isLate = task.late === 'true' || task.late === true;
+    const lateIndicator = isLate ? '<span class="late-indicator">⚠️ LATE</span>' : '';
+    
+    // Format dates
+    const dueDate = task.dueDate ? formatDate(task.dueDate) : 'No due date';
+    const createdDate = task.createdDate ? formatDate(task.createdDate) : '';
     
     card.innerHTML = `
-        <div class="project-header">
-            <div>
-                <div class="project-name">${project.name}</div>
-                <div class="project-type-badge ${project.projectType}">${project.projectType}</div>
-            </div>
-            <div class="project-status status-${project.status}">${project.status}</div>
+        <div class="task-header">
+            <div class="task-title">${task.taskName}</div>
+            <div class="task-status ${statusClass}">${statusText}</div>
         </div>
         
-        <div class="project-description">${project.description}</div>
+        ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
         
-        <div class="project-dates">
-            <span>Start: ${formatDate(project.startDate)}</span>
-            <span>End: ${formatDate(project.endDate)}</span>
+        <div class="task-bucket">
+            <span class="bucket-label">Bucket:</span>
+            <span class="bucket-name">${task.bucketName}</span>
         </div>
         
-        <div class="progress-container">
-            <div class="progress-label">
-                <span>Progress</span>
-                <span>${project.progress}%</span>
+        <div class="task-priority priority-${priorityClass}">
+            Priority: ${task.priority}
+        </div>
+        
+        <div class="task-assignment">
+            <span class="assigned-label">Assigned to:</span>
+            <span class="assigned-to">${task.assignedTo || 'Unassigned'}</span>
+        </div>
+        
+        <div class="task-dates">
+            <div class="task-date">
+                <span class="date-label">Created:</span>
+                <span class="date-value">${createdDate}</span>
             </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${project.progress}%"></div>
-                <div class="progress-percentage">${project.progress}%</div>
+            <div class="task-date">
+                <span class="date-label">Due:</span>
+                <span class="date-value ${isLate ? 'late' : ''}">${dueDate}</span>
+                ${lateIndicator}
             </div>
         </div>
         
-        ${project.teamMembers && project.teamMembers.length > 0 ? `
-        <div class="team-members">
-            <div class="team-label">Team Members</div>
-            <div class="team-list">
-                ${project.teamMembers.map(member => `<span class="team-member">${member}</span>`).join('')}
+        ${task.checklistItems ? `
+        <div class="task-checklist">
+            <div class="checklist-label">Checklist:</div>
+            <div class="checklist-progress">
+                <span class="checklist-text">${task.completedChecklistItems || '0'}/${task.checklistItems.split(';').length || '0'}</span>
+                <div class="checklist-items">${task.checklistItems}</div>
             </div>
         </div>
         ` : ''}
         
-        <div class="project-checklist">
-            <div class="checklist-label">Project Checklist</div>
-            <div class="checklist-items">
-                <div class="checklist-item">
-                    <input type="checkbox" ${getChecklistStatus(project, 'engineering-docs') ? 'checked' : ''} disabled>
-                    <label>Engineering Docs</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" ${getChecklistStatus(project, 'alpha-prototype') ? 'checked' : ''} disabled>
-                    <label>Alpha Prototype</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" ${getChecklistStatus(project, 'beta-prototype') ? 'checked' : ''} disabled>
-                    <label>Beta Prototype</label>
-                </div>
-                <div class="checklist-item">
-                    <input type="checkbox" ${getChecklistStatus(project, 'production') ? 'checked' : ''} disabled>
-                    <label>Production</label>
-                </div>
-            </div>
+        ${task.labels ? `
+        <div class="task-labels">
+            <span class="labels-label">Labels:</span>
+            <span class="labels-text">${task.labels}</span>
         </div>
+        ` : ''}
         
-        <div class="project-actions">
-            <button class="action-btn edit" onclick="viewProjectDetails(${project.id})">View Details</button>
-            <button class="action-btn edit" onclick="editProject(${project.id})">Edit</button>
-            <button class="action-btn delete" onclick="deleteProject(${project.id})">Delete</button>
+        <div class="task-actions">
+            <button class="action-btn view" onclick="viewTaskDetails('${task.taskId}')">View Details</button>
         </div>
     `;
     
@@ -504,61 +189,6 @@ function formatDate(dateString) {
     });
 }
 
-// Show add project form
-function showAddProjectForm() {
-    document.getElementById('project-form-modal').style.display = 'block';
-    // Set default start date to today
-    document.getElementById('start-date').value = new Date().toISOString().split('T')[0];
-}
-
-// Hide add project form
-function hideAddProjectForm() {
-    document.getElementById('project-form-modal').style.display = 'none';
-    document.getElementById('project-form').reset();
-    document.getElementById('progress-value').textContent = '0%';
-}
-
-// Handle project form submission
-function handleProjectSubmit(event) {
-    event.preventDefault();
-    
-    const formData = new FormData(event.target);
-    const projectData = {
-        id: Date.now(), // Simple unique ID
-        name: formData.get('name'),
-        description: formData.get('description'),
-        projectType: formData.get('projectType'),
-        status: formData.get('status'),
-        startDate: formData.get('startDate'),
-        endDate: formData.get('endDate'),
-        progress: parseInt(formData.get('progress')),
-        teamMembers: formData.get('teamMembers') ? 
-            formData.get('teamMembers').split(',').map(m => m.trim()).filter(m => m) : [],
-        notes: formData.get('notes'),
-        createdAt: new Date().toISOString()
-    };
-    
-    saveProject(projectData);
-    hideAddProjectForm();
-}
-
-// Future: Save project to shared database
-async function saveProject(projectData) {
-    // TODO: Replace with actual database call
-    // For now, save to LocalStorage for development
-    const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
-    projects.push(projectData);
-    localStorage.setItem('rdProjects', JSON.stringify(projects));
-    
-    // Reload and display projects
-    loadProjects();
-    
-    // Update KPIs
-    updateKPIs();
-    
-    // Show success message
-    alert('Project saved successfully!');
-}
 
 // View project details
 function viewProjectDetails(projectId) {
@@ -617,76 +247,107 @@ function hideProjectDetails() {
     document.getElementById('project-details-modal').style.display = 'none';
 }
 
-// Edit project (placeholder)
-function editProject(projectId) {
-    alert('Edit functionality will be implemented in the next version!');
-}
-
-// Delete project
-function deleteProject(projectId) {
-    if (confirm('Are you sure you want to delete this project?')) {
-        const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
-        const filteredProjects = projects.filter(p => p.id !== projectId);
-        localStorage.setItem('rdProjects', JSON.stringify(filteredProjects));
-        loadProjects();
-        updateKPIs();
-        alert('Project deleted successfully!');
-    }
-}
 
 // Apply filter
 function applyFilter(filter) {
-    const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
-    let filteredProjects = projects;
+    const tasks = JSON.parse(localStorage.getItem('rdTasks') || '[]');
+    let filteredTasks = tasks;
     
     switch(filter) {
-        case 'large':
-            filteredProjects = projects.filter(p => p.projectType === 'large');
-            break;
-        case 'small':
-            filteredProjects = projects.filter(p => p.projectType === 'small');
-            break;
         case 'active':
-            filteredProjects = projects.filter(p => p.status === 'active');
+            filteredTasks = tasks.filter(t => t.progress === 'In progress');
             break;
         case 'completed':
-            filteredProjects = projects.filter(p => p.status === 'completed');
+            filteredTasks = tasks.filter(t => t.progress === 'Completed');
+            break;
+        case 'not-started':
+            filteredTasks = tasks.filter(t => t.progress === 'Not started');
             break;
         case 'all':
         default:
-            filteredProjects = projects;
+            filteredTasks = tasks;
             break;
     }
     
-    displayProjects(filteredProjects);
+    displayTasks(filteredTasks);
 }
 
 // Enhanced export data with multiple formats
 // Export data function
 function exportData() {
     try {
-        const projects = getProjects();
+        const tasks = getTasks();
         
-        // Ensure projects is an array
-        if (!Array.isArray(projects)) {
-            throw new Error('No valid projects data found');
+        // Ensure tasks is an array
+        if (!Array.isArray(tasks)) {
+            throw new Error('No valid tasks data found');
         }
         
-        // Create Excel-compatible CSV export
-        const csvContent = DataUtils.exportToCSV(projects);
-        const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const csvUrl = URL.createObjectURL(csvBlob);
-        const csvLink = document.createElement('a');
-        csvLink.href = csvUrl;
-        csvLink.download = `rd-dashboard-projects-${new Date().toISOString().split('T')[0]}.csv`;
-        csvLink.click();
-        URL.revokeObjectURL(csvUrl);
+        // Check if XLSX library is available for Excel export
+        if (typeof XLSX !== 'undefined') {
+            exportToExcel(tasks);
+        } else {
+            // Fallback to CSV if Excel library not available
+            exportToCSV(tasks);
+        }
         
-        showNotification('Data exported to Excel format! You can now edit it in Excel and import it back.', 'success');
     } catch (error) {
         console.error('Export error:', error);
         showNotification(`Export failed: ${error.message}`, 'error');
     }
+}
+
+// Export to Excel format (.xlsx)
+function exportToExcel(tasks) {
+    try {
+        // Create CSV content first
+        const csvContent = DataUtils.exportToCSV(tasks);
+        
+        // Convert CSV to Excel workbook
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.aoa_to_sheet(
+            csvContent.split('\n').map(row => 
+                row.split(',').map(cell => 
+                    cell.replace(/^"(.*)"$/, '$1').replace(/""/g, '"')
+                )
+            )
+        );
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'R&D Tasks');
+        
+        // Generate Excel file
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        // Download the file
+        const url = URL.createObjectURL(excelBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `rd-dashboard-tasks-${new Date().toISOString().split('T')[0]}.xlsx`;
+        link.click();
+        URL.revokeObjectURL(url);
+        
+        showNotification('Data exported to Excel format (.xlsx)! You can now edit it in Excel and import it back.', 'success');
+        
+    } catch (error) {
+        // Fallback to CSV if Excel export fails
+        exportToCSV(tasks);
+    }
+}
+
+// Export to CSV format (fallback)
+function exportToCSV(tasks) {
+    const csvContent = DataUtils.exportToCSV(tasks);
+    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvUrl = URL.createObjectURL(csvBlob);
+    const csvLink = document.createElement('a');
+    csvLink.href = csvUrl;
+    csvLink.download = `rd-dashboard-tasks-${new Date().toISOString().split('T')[0]}.csv`;
+    csvLink.click();
+    URL.revokeObjectURL(csvUrl);
+    
+    showNotification('Data exported to CSV format! You can now edit it in Excel and import it back.', 'success');
 }
 
 // Import data function
@@ -700,64 +361,100 @@ function handleFileImport(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const content = e.target.result;
-            
-            // Check file type
-            if (file.name.toLowerCase().endsWith('.csv')) {
-                importFromCSV(content);
-            } else {
-                showNotification('Please use CSV files for import. Excel files (.xlsx, .xls) are not supported yet.', 'error');
-                return;
-            }
-        } catch (error) {
-            showNotification(`Import failed: ${error.message}`, 'error');
-        }
-    };
+    const fileExtension = file.name.toLowerCase().split('.').pop();
     
-    reader.readAsText(file);
+    if (fileExtension === 'csv') {
+        // Handle CSV files
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const content = e.target.result;
+                importFromCSV(content);
+            } catch (error) {
+                showNotification(`Import failed: ${error.message}`, 'error');
+            }
+        };
+        reader.readAsText(file);
+    } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+        // Handle Excel files
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                importFromExcel(e.target.result, fileExtension);
+            } catch (error) {
+                showNotification(`Excel import failed: ${error.message}`, 'error');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    } else {
+        showNotification('Please use CSV, XLS, or XLSX files for import.', 'error');
+    }
+}
+
+// Import from Excel files (XLS/XLSX)
+function importFromExcel(arrayBuffer, fileExtension) {
+    try {
+        // Check if XLSX library is available
+        if (typeof XLSX === 'undefined') {
+            throw new Error('Excel parsing library not loaded. Please refresh the page.');
+        }
+        
+        // Parse the Excel file
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        
+        // Check if workbook has any sheets
+        if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+            throw new Error('Excel file contains no worksheets.');
+        }
+        
+        // Get the first worksheet
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Check if worksheet has data
+        if (!worksheet || Object.keys(worksheet).length === 0) {
+            throw new Error('The first worksheet in the Excel file is empty.');
+        }
+        
+        // Convert worksheet to CSV format
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+        
+        // Check if CSV content is empty
+        if (!csvContent || csvContent.trim().length === 0) {
+            throw new Error('No data found in the Excel file. Please check if the file contains project data.');
+        }
+        
+        // Use the existing CSV import function
+        importFromCSV(csvContent);
+        
+    } catch (error) {
+        // Show specific error message
+        showNotification(`Excel import failed: ${error.message}`, 'error');
+        throw error;
+    }
 }
 
 // Import from CSV content
 function importFromCSV(csvContent) {
     try {
-        const importedProjects = DataUtils.importFromCSV(csvContent);
+        const importedTasks = DataUtils.importFromCSV(csvContent);
         
-        if (importedProjects.length === 0) {
-            showNotification('No valid projects found in the CSV file.', 'error');
+        if (importedTasks.length === 0) {
+            showNotification('No valid tasks found in the CSV file.', 'error');
             return;
         }
         
-        // Validate imported data
-        const validProjects = [];
-        const errors = [];
-        
-        importedProjects.forEach((project, index) => {
-            const validationErrors = DataUtils.validateProjectData(project);
-            if (validationErrors.length === 0) {
-                validProjects.push(DataUtils.sanitizeProjectData(project));
-            } else {
-                errors.push(`Row ${index + 2}: ${validationErrors.join(', ')}`);
-            }
-        });
-        
-        if (validProjects.length === 0) {
-            showNotification('No valid projects found. Please check your CSV format.', 'error');
-            return;
-        }
-        
-        // Confirm import
-        const confirmMessage = `Import ${validProjects.length} projects?${errors.length > 0 ? `\n\n${errors.length} rows had errors and will be skipped.` : ''}`;
+        // Confirm import - warn about replacing all data
+        const confirmMessage = `This will REPLACE ALL current data with ${importedTasks.length} tasks from Teams Planner.\n\nAre you sure you want to continue?`;
         if (confirm(confirmMessage)) {
-            // Save imported projects
-            localStorage.setItem('rdProjects', JSON.stringify(validProjects));
+            // Clear all existing data and save only imported tasks
+            localStorage.setItem('rdTasks', JSON.stringify(importedTasks));
             
-            // Refresh dashboard
+            
+            // Refresh dashboard with new data
             initializeDashboard();
             
-            const message = `Successfully imported ${validProjects.length} projects.${errors.length > 0 ? ` ${errors.length} rows were skipped due to errors.` : ''}`;
+            const message = `Successfully imported ${importedTasks.length} tasks from Teams Planner!`;
             showNotification(message, 'success');
         }
         
@@ -766,22 +463,6 @@ function importFromCSV(csvContent) {
     }
 }
 
-// Milestone Management Functions
-function addMilestone() {
-    const container = document.getElementById('milestones-container');
-    const milestoneItem = document.createElement('div');
-    milestoneItem.className = 'milestone-item';
-    milestoneItem.innerHTML = `
-        <input type="text" name="milestone-name" placeholder="Milestone name" class="milestone-input">
-        <input type="date" name="milestone-date" class="milestone-date">
-        <button type="button" class="btn-remove-milestone" onclick="removeMilestone(this)">×</button>
-    `;
-    container.appendChild(milestoneItem);
-}
-
-function removeMilestone(button) {
-    button.parentElement.remove();
-}
 
 // Reports Functions
 function showReports() {
@@ -1053,47 +734,54 @@ function handleProjectSubmit(event) {
     hideAddProjectForm();
 }
 
-// KPI Functions
+// KPI Functions - Real metrics from Teams Planner task data
 function updateKPIs() {
-    const projects = JSON.parse(localStorage.getItem('rdProjects') || '[]');
+    const tasks = JSON.parse(localStorage.getItem('rdTasks') || '[]');
     
-    // Calculate KPIs
-    const runningProjects = projects.filter(p => p.status === 'active').length;
-    const completedThisYear = projects.filter(p => {
-        if (p.status !== 'completed') return false;
-        // Use completedDate if available, otherwise use endDate
-        const completedDate = new Date(p.completedDate || p.endDate);
-        const currentYear = new Date().getFullYear();
-        return completedDate.getFullYear() === currentYear;
-    }).length;
+    if (!tasks || tasks.length === 0) {
+        // Reset all KPIs to 0 when no data
+        document.getElementById('kpi-total-tasks').textContent = '0';
+        document.getElementById('kpi-in-progress').textContent = '0';
+        document.getElementById('kpi-completed-tasks').textContent = '0';
+        document.getElementById('kpi-overdue-tasks').textContent = '0';
+        document.getElementById('kpi-urgent-tasks').textContent = '0';
+        return;
+    }
     
-    const overdueProjects = projects.filter(p => {
-        if (p.status === 'completed') return false;
-        const endDate = new Date(p.endDate);
+    // Calculate real KPIs from Teams Planner task data
+    const totalTasks = tasks.length;
+    
+    const inProgressTasks = tasks.filter(task => 
+        task.progress === 'In progress'
+    ).length;
+    
+    const completedTasks = tasks.filter(task => 
+        task.progress === 'Completed'
+    ).length;
+    
+    // Count overdue tasks (tasks with due dates that have passed and are not completed)
+    const overdueTasks = tasks.filter(task => {
+        if (task.progress === 'Completed') return false;
+        if (!task.dueDate) return false;
+        
+        const dueDate = new Date(task.dueDate);
         const today = new Date();
-        return endDate < today;
+        today.setHours(0, 0, 0, 0); // Reset time to start of day
+        
+        return dueDate < today;
     }).length;
     
-    const unstartedProjects = projects.filter(p => {
-        if (p.status === 'completed') return false;
-        const startDate = new Date(p.startDate);
-        const today = new Date();
-        return startDate > today;
-    }).length;
-    
-    const piFormsCompleted = projects.filter(p => {
-        // Count projects that have milestones with "PI" in the name
-        return p.milestones && p.milestones.some(m => 
-            m.name.toLowerCase().includes('pi') && m.completed
-        );
-    }).length;
+    // Count urgent priority tasks
+    const urgentTasks = tasks.filter(task => 
+        task.priority === 'Urgent'
+    ).length;
     
     // Update KPI displays
-    document.getElementById('kpi-running-projects').textContent = runningProjects;
-    document.getElementById('kpi-completed-this-year').textContent = completedThisYear;
-    document.getElementById('kpi-overdue-projects').textContent = overdueProjects;
-    document.getElementById('kpi-unstarted-projects').textContent = unstartedProjects;
-    document.getElementById('kpi-pi-forms-completed').textContent = piFormsCompleted;
+    document.getElementById('kpi-total-tasks').textContent = totalTasks;
+    document.getElementById('kpi-in-progress').textContent = inProgressTasks;
+    document.getElementById('kpi-completed-tasks').textContent = completedTasks;
+    document.getElementById('kpi-overdue-tasks').textContent = overdueTasks;
+    document.getElementById('kpi-urgent-tasks').textContent = urgentTasks;
     
     // Add animation effect
     animateKPIUpdates();
@@ -1135,19 +823,28 @@ function getChecklistStatus(project, checklistType) {
     }
 }
 
-// Reset data function (for development/testing)
+// Clear all data function (for development/testing)
 function resetData() {
-    if (confirm('This will reset all data to the default sample projects. Continue?')) {
+    if (confirm('This will clear all data from the dashboard. Continue?')) {
         localStorage.removeItem('rdProjects');
         initializeDashboard();
-        showNotification('Data reset to default sample projects', 'success');
+        showNotification('All data cleared from dashboard', 'success');
     }
 }
 
 // Notification system for user feedback
 function showNotification(message, type = 'info') {
-    // Simple notification - can be enhanced with a proper notification library later
+    // Remove any existing notifications first
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    });
+    
+    // Create new notification
     const notification = document.createElement('div');
+    notification.className = 'notification';
     notification.style.cssText = `
         position: fixed;
         top: 20px;
@@ -1155,122 +852,44 @@ function showNotification(message, type = 'info') {
         background: ${type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#3498db'};
         color: white;
         padding: 15px 20px;
-        border-radius: 5px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         z-index: 10000;
         font-family: Inter, sans-serif;
-        max-width: 300px;
+        max-width: 350px;
+        font-size: 14px;
+        line-height: 1.4;
+        border: 1px solid ${type === 'success' ? 'rgba(46, 204, 113, 0.3)' : type === 'error' ? 'rgba(231, 76, 60, 0.3)' : 'rgba(52, 152, 219, 0.3)'};
+        animation: slideInNotification 0.3s ease-out;
     `;
     notification.textContent = message;
     
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInNotification {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+    
     document.body.appendChild(notification);
     
-    // Remove notification after 4 seconds
+    // Remove notification after 5 seconds (longer for error messages)
+    const timeout = type === 'error' ? 6000 : 4000;
     setTimeout(() => {
         if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
+            notification.style.animation = 'slideInNotification 0.3s ease-out reverse';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
         }
-    }, 4000);
+    }, timeout);
 }
 
-// Enable horizontal scrolling animation for project grids
-function enableProjectScrolling() {
-    const projectGrids = document.querySelectorAll('.projects-grid');
-    
-    projectGrids.forEach(grid => {
-        // Add auto-scroll class for animation
-        grid.classList.add('auto-scroll');
-        
-        // Pause animation when user manually scrolls
-        let scrollTimeout;
-        grid.addEventListener('scroll', function() {
-            grid.classList.remove('auto-scroll');
-            
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                grid.classList.add('auto-scroll');
-            }, 3000); // Resume animation after 3 seconds of no manual scrolling
-        });
-        
-        // Pause animation on mouse enter, resume on mouse leave
-        grid.addEventListener('mouseenter', function() {
-            this.style.animationPlayState = 'paused';
-        });
-        
-        grid.addEventListener('mouseleave', function() {
-            this.style.animationPlayState = 'running';
-        });
-    });
-}
-
-// Add navigation arrows for better UX (optional enhancement)
-function addScrollNavigation() {
-    const sections = document.querySelectorAll('.large-projects-section, .small-projects-section');
-    
-    sections.forEach(section => {
-        const grid = section.querySelector('.projects-grid');
-        if (!grid) return;
-        
-        // Create navigation container
-        const navContainer = document.createElement('div');
-        navContainer.style.cssText = `
-            position: relative;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        `;
-        
-        // Create left arrow
-        const leftArrow = document.createElement('button');
-        leftArrow.innerHTML = '←';
-        leftArrow.style.cssText = `
-            background: rgba(99, 102, 241, 0.2);
-            border: 1px solid rgba(99, 102, 241, 0.4);
-            color: #6366f1;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 18px;
-            transition: all 0.2s ease;
-        `;
-        
-        // Create right arrow
-        const rightArrow = document.createElement('button');
-        rightArrow.innerHTML = '→';
-        rightArrow.style.cssText = leftArrow.style.cssText;
-        
-        // Add hover effects
-        [leftArrow, rightArrow].forEach(arrow => {
-            arrow.addEventListener('mouseenter', function() {
-                this.style.background = 'rgba(99, 102, 241, 0.4)';
-                this.style.transform = 'scale(1.1)';
-            });
-            
-            arrow.addEventListener('mouseleave', function() {
-                this.style.background = 'rgba(99, 102, 241, 0.2)';
-                this.style.transform = 'scale(1)';
-            });
-        });
-        
-        // Add click functionality
-        leftArrow.addEventListener('click', () => {
-            grid.scrollBy({ left: -370, behavior: 'smooth' });
-        });
-        
-        rightArrow.addEventListener('click', () => {
-            grid.scrollBy({ left: 370, behavior: 'smooth' });
-        });
-        
-        // Insert navigation
-        const header = section.querySelector('.section-header');
-        if (header) {
-            navContainer.appendChild(leftArrow);
-            navContainer.appendChild(rightArrow);
-            header.parentNode.insertBefore(navContainer, grid);
-        }
-    });
-}
 
 // Future: Real-time updates when database changes
 // TODO: Implement WebSocket or polling for real-time updates

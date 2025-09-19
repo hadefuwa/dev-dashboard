@@ -55,73 +55,55 @@ function sanitizeProjectData(projectData) {
 }
 
 // Data export/import functions
-function exportToCSV(projects) {
-    if (!projects || projects.length === 0) {
-        return 'No projects to export';
+function exportToCSV(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return 'No tasks to export';
     }
 
-    // CSV headers - Excel friendly format
+    // CSV headers - Teams Planner format
     const headers = [
-        'ID',
-        'Name', 
-        'Description',
-        'Project Type',
-        'Status',
+        'Task ID',
+        'Task Name',
+        'Bucket Name',
+        'Progress',
+        'Priority',
+        'Assigned To',
+        'Created By',
+        'Created Date',
         'Start Date',
-        'End Date',
-        'Progress (%)',
-        'Team Members',
-        'Notes',
-        'Milestone 1 Name',
-        'Milestone 1 Due Date',
-        'Milestone 1 Completed',
-        'Milestone 2 Name',
-        'Milestone 2 Due Date',
-        'Milestone 2 Completed',
-        'Milestone 3 Name',
-        'Milestone 3 Due Date',
-        'Milestone 3 Completed',
-        'Milestone 4 Name',
-        'Milestone 4 Due Date',
-        'Milestone 4 Completed',
-        'Milestone 5 Name',
-        'Milestone 5 Due Date',
-        'Milestone 5 Completed'
+        'Due Date',
+        'Is Recurring',
+        'Late',
+        'Completed Date',
+        'Completed By',
+        'Completed Checklist Items',
+        'Checklist Items',
+        'Labels',
+        'Description'
     ];
 
-    // Convert projects to CSV rows
-    const rows = projects.map(project => {
-        const teamMembers = project.teamMembers ? project.teamMembers.join('; ') : '';
-        const milestones = project.milestones || [];
-        
-        // Create row with all milestone columns
-        const row = [
-            project.id,
-            project.name,
-            project.description,
-            project.projectType,
-            project.status,
-            project.startDate,
-            project.endDate,
-            project.progress,
-            teamMembers,
-            project.notes || ''
+    // Convert tasks to CSV rows
+    const rows = tasks.map(task => {
+        return [
+            task.taskId || '',
+            task.taskName || '',
+            task.bucketName || '',
+            task.progress || '',
+            task.priority || '',
+            task.assignedTo || '',
+            task.createdBy || '',
+            task.createdDate || '',
+            task.startDate || '',
+            task.dueDate || '',
+            task.isRecurring || 'false',
+            task.late || 'false',
+            task.completedDate || '',
+            task.completedBy || '',
+            task.completedChecklistItems || '',
+            task.checklistItems || '',
+            task.labels || '',
+            task.description || ''
         ];
-
-        // Add milestone data (up to 5 milestones)
-        for (let i = 0; i < 5; i++) {
-            if (milestones[i]) {
-                row.push(milestones[i].name);
-                row.push(milestones[i].dueDate);
-                row.push(milestones[i].completed ? 'Yes' : 'No');
-            } else {
-                row.push('');
-                row.push('');
-                row.push('');
-            }
-        }
-
-        return row;
     });
 
     // Combine headers and rows
@@ -142,19 +124,21 @@ function importFromCSV(csvContent) {
         // Parse headers
         const headers = parseCSVLine(lines[0]);
         const expectedHeaders = [
-            'ID', 'Name', 'Description', 'Project Type', 'Status',
-            'Start Date', 'End Date', 'Progress (%)', 'Team Members', 'Notes'
+            'Task ID', 'Task Name', 'Bucket Name', 'Progress', 'Priority',
+            'Assigned To', 'Created By', 'Created Date', 'Start date', 'Due date'
         ];
 
-        // Validate headers
-        for (let i = 0; i < expectedHeaders.length; i++) {
-            if (!headers[i] || headers[i].toLowerCase() !== expectedHeaders[i].toLowerCase()) {
-                throw new Error(`Invalid header: expected "${expectedHeaders[i]}", found "${headers[i]}"`);
-            }
+        // Check if this is a Teams Planner export
+        const isTeamsPlanner = headers.length >= 10 && 
+            headers[0].toLowerCase().includes('task id') && 
+            headers[1].toLowerCase().includes('task name');
+
+        if (!isTeamsPlanner) {
+            throw new Error('This doesn\'t appear to be a Teams Planner export. Expected columns: Task ID, Task Name, Bucket Name, etc.');
         }
 
         // Parse data rows
-        const projects = [];
+        const tasks = [];
         for (let i = 1; i < lines.length; i++) {
             const values = parseCSVLine(lines[i]);
             
@@ -163,37 +147,35 @@ function importFromCSV(csvContent) {
                 continue;
             }
 
-            // Parse basic project data
-            const project = {
-                id: parseInt(values[0]) || Date.now() + i,
-                name: values[1],
-                description: values[2],
-                projectType: values[3] || 'small',
-                status: values[4] || 'active',
-                startDate: values[5],
-                endDate: values[6],
-                progress: parseInt(values[7]) || 0,
-                teamMembers: values[8] ? values[8].split(';').map(m => m.trim()).filter(m => m) : [],
-                notes: values[9] || '',
-                milestones: []
+            // Parse Teams Planner task data
+            const task = {
+                taskId: values[0] || '',
+                taskName: values[1] || '',
+                bucketName: values[2] || '',
+                progress: values[3] || '',
+                priority: values[4] || '',
+                assignedTo: values[5] || '',
+                createdBy: values[6] || '',
+                createdDate: values[7] || '',
+                startDate: values[8] || '',
+                dueDate: values[9] || '',
+                isRecurring: values[10] || 'false',
+                late: values[11] || 'false',
+                completedDate: values[12] || '',
+                completedBy: values[13] || '',
+                completedChecklistItems: values[14] || '',
+                checklistItems: values[15] || '',
+                labels: values[16] || '',
+                description: values[17] || ''
             };
 
-            // Parse milestones (columns 10-24)
-            for (let j = 0; j < 5; j++) {
-                const milestoneIndex = 10 + (j * 3);
-                if (values[milestoneIndex] && values[milestoneIndex].trim()) {
-                    project.milestones.push({
-                        name: values[milestoneIndex],
-                        dueDate: values[milestoneIndex + 1] || '',
-                        completed: values[milestoneIndex + 2] === 'Yes'
-                    });
-                }
+            // Only add tasks with a task name
+            if (task.taskName.trim()) {
+                tasks.push(task);
             }
-
-            projects.push(project);
         }
 
-        return projects;
+        return tasks;
     } catch (error) {
         throw new Error(`Import failed: ${error.message}`);
     }

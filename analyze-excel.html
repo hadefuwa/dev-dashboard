@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Excel File Analyzer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h1>Teams Planner Excel File Analyzer</h1>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" />
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    let output = '<h2>Excel File Analysis:</h2>';
+                    output += `<p><strong>File:</strong> ${file.name}</p>`;
+                    output += `<p><strong>Number of Sheets:</strong> ${workbook.SheetNames.length}</p>`;
+                    
+                    workbook.SheetNames.forEach((sheetName, index) => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const csvData = XLSX.utils.sheet_to_csv(worksheet);
+                        const lines = csvData.split('\n').filter(line => line.trim());
+                        
+                        output += `<h3>Sheet ${index + 1}: "${sheetName}"</h3>`;
+                        output += `<p><strong>Rows:</strong> ${lines.length}</p>`;
+                        
+                        if (lines.length > 0) {
+                            const headers = lines[0].split(',');
+                            output += `<p><strong>Columns:</strong> ${headers.length}</p>`;
+                            output += '<h4>Headers:</h4><ul>';
+                            headers.forEach(header => {
+                                output += `<li>"${header.replace(/"/g, '')}"</li>`;
+                            });
+                            output += '</ul>';
+                            
+                            if (lines.length > 1) {
+                                output += '<h4>Sample Data (First 3 rows):</h4>';
+                                output += '<table border="1" style="border-collapse: collapse; margin: 10px 0;">';
+                                for (let i = 0; i < Math.min(4, lines.length); i++) {
+                                    const cells = lines[i].split(',');
+                                    output += '<tr>';
+                                    cells.forEach(cell => {
+                                        output += `<td style="padding: 5px; border: 1px solid #ccc;">${cell.replace(/"/g, '')}</td>`;
+                                    });
+                                    output += '</tr>';
+                                }
+                                output += '</table>';
+                            }
+                        }
+                        
+                        output += '<hr>';
+                    });
+                    
+                    document.getElementById('output').innerHTML = output;
+                    
+                } catch (error) {
+                    document.getElementById('output').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
