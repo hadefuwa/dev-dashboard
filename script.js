@@ -24,6 +24,9 @@ async function initializeDashboard() {
     // Start auto-rotation if tasks exist
     if (tasks && tasks.length > 0) {
         startAutoRotation(tasks);
+    } else {
+        // Update progress indicator for empty state
+        updateProgressIndicator(0, 0, 0);
     }
 }
 
@@ -198,6 +201,7 @@ function displayTaskSet(tasks, startIndex) {
                 <p>Your dashboard is empty and ready for your Teams Planner data!</p>
             </div>
         `;
+        updateProgressIndicator(0, 0, 0);
         return;
     }
     
@@ -222,6 +226,43 @@ function displayTaskSet(tasks, startIndex) {
                 taskCard.style.transform = 'translateY(0)';
             }, i * 100);
         }
+    }
+    
+    // Update progress indicator
+    updateProgressIndicator(tasks.length, startIndex, 6);
+}
+
+function updateProgressIndicator(totalTasks, startIndex, tasksPerSet) {
+    // Update the current range display
+    const currentRange = document.getElementById('current-range');
+    const totalTasksCount = document.getElementById('total-tasks-count');
+    const progressDots = document.getElementById('progress-dots');
+    
+    if (!totalTasks || totalTasks === 0) {
+        currentRange.textContent = 'No Tasks';
+        totalTasksCount.textContent = '0';
+        progressDots.innerHTML = '';
+        return;
+    }
+    
+    // Calculate the current range
+    const startTask = startIndex + 1;
+    const endTask = Math.min(startIndex + tasksPerSet, totalTasks);
+    currentRange.textContent = `Tasks ${startTask}-${endTask}`;
+    
+    // Update total tasks count
+    totalTasksCount.textContent = totalTasks.toString();
+    
+    // Calculate number of sets
+    const totalSets = Math.ceil(totalTasks / tasksPerSet);
+    const currentSet = Math.floor(startIndex / tasksPerSet);
+    
+    // Generate progress dots
+    progressDots.innerHTML = '';
+    for (let i = 0; i < totalSets; i++) {
+        const dot = document.createElement('div');
+        dot.className = `progress-dot ${i === currentSet ? 'active' : ''}`;
+        progressDots.appendChild(dot);
     }
 }
 
@@ -967,6 +1008,7 @@ function updateKPIs() {
         document.getElementById('kpi-completed-tasks').textContent = '0';
         document.getElementById('kpi-overdue-tasks').textContent = '0';
         document.getElementById('kpi-urgent-tasks').textContent = '0';
+        document.getElementById('kpi-urgent').textContent = '0';
         return;
     }
     
@@ -998,12 +1040,16 @@ function updateKPIs() {
         task.priority === 'Urgent'
     ).length;
     
+    // Count urgent tasks (same as urgent priority for consistency)
+    const urgent = urgentTasks;
+    
     // Update KPI displays
     document.getElementById('kpi-total-tasks').textContent = totalTasks;
     document.getElementById('kpi-in-progress').textContent = inProgressTasks;
     document.getElementById('kpi-completed-tasks').textContent = completedTasks;
     document.getElementById('kpi-overdue-tasks').textContent = overdueTasks;
     document.getElementById('kpi-urgent-tasks').textContent = urgentTasks;
+    document.getElementById('kpi-urgent').textContent = urgent;
     
     // Add animation effect
     animateKPIUpdates();

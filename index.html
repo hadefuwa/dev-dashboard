@@ -13,6 +13,8 @@
     <!-- Main gradient background with hexagonal pattern -->
     <div class="hex-pattern"></div>
     
+    <!-- Main Container -->
+    <div class="main-container">
     <!-- Header -->
     <header class="header">
         <div class="header-left">
@@ -43,7 +45,6 @@
         </div>
         <div class="header-right">
             <div class="header-actions">
-                <button class="btn btn-secondary" onclick="toggleKioskMode()">🖥️ Kiosk Mode</button>
                 <button class="btn btn-secondary" onclick="showReports()">Reports</button>
                 <button class="btn btn-secondary" onclick="exportData()">Export to Excel</button>
                 <button class="btn btn-primary" onclick="importData()">Import from Teams Planner</button>
@@ -77,6 +78,10 @@
                 <div class="kpi-number" id="kpi-urgent-tasks">0</div>
                 <div class="kpi-label">Urgent Priority</div>
             </div>
+            <div class="kpi-card">
+                <div class="kpi-number" id="kpi-urgent">0</div>
+                <div class="kpi-label">Urgent</div>
+            </div>
         </div>
     </section>
 
@@ -85,6 +90,16 @@
     <section class="projects-section">
         <div class="projects-grid" id="projects-grid">
             <!-- All tasks will be loaded here -->
+        </div>
+        <div class="task-progress-indicator">
+            <div class="progress-info">
+                <span id="current-range">Tasks 1-6</span>
+                <span class="progress-separator">of</span>
+                <span id="total-tasks-count">0</span>
+            </div>
+            <div class="progress-dots" id="progress-dots">
+                <!-- Progress dots will be generated here -->
+            </div>
         </div>
     </section>
 
@@ -156,6 +171,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="data.js"></script>
     <script src="script.js"></script>
+    </div>
 </body>
 </html>
 
