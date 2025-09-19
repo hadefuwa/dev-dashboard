@@ -21,6 +21,140 @@ async function initializeDashboard() {
     updateKPIs();
 }
 
+// Setup complex title animation
+function setupTitleAnimation() {
+    const titleLetters = document.querySelectorAll('.title-letter');
+    
+    // Set CSS custom property for each letter to create staggered animation
+    titleLetters.forEach((letter, index) => {
+        letter.style.setProperty('--letter-index', index);
+        
+        // Add random particle generation on hover
+        letter.addEventListener('mouseenter', function() {
+            createParticleBurst(this);
+        });
+        
+        // Add click effect
+        letter.addEventListener('click', function() {
+            createClickRipple(this);
+        });
+    });
+    
+    // Create floating particles around the title
+    createFloatingParticles();
+}
+
+// Create particle burst effect on letter hover
+function createParticleBurst(element) {
+    const rect = element.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'burst-particle';
+        particle.style.cssText = `
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            left: ${centerX}px;
+            top: ${centerY}px;
+            animation: burstParticle 1s ease-out forwards;
+        `;
+        
+        // Random direction and distance
+        const angle = (i / 8) * Math.PI * 2;
+        const distance = 50 + Math.random() * 30;
+        const endX = centerX + Math.cos(angle) * distance;
+        const endY = centerY + Math.sin(angle) * distance;
+        
+        particle.style.setProperty('--end-x', `${endX}px`);
+        particle.style.setProperty('--end-y', `${endY}px`);
+        
+        document.body.appendChild(particle);
+        
+        // Remove particle after animation
+        setTimeout(() => {
+            if (particle.parentNode) {
+                particle.parentNode.removeChild(particle);
+            }
+        }, 1000);
+    }
+}
+
+// Create click ripple effect
+function createClickRipple(element) {
+    const rect = element.getBoundingClientRect();
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple-effect';
+    ripple.style.cssText = `
+        position: fixed;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(99, 102, 241, 0.8);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 1000;
+        left: ${rect.left + rect.width / 2 - 10}px;
+        top: ${rect.top + rect.height / 2 - 10}px;
+        animation: rippleExpand 0.6s ease-out forwards;
+    `;
+    
+    document.body.appendChild(ripple);
+    
+    setTimeout(() => {
+        if (ripple.parentNode) {
+            ripple.parentNode.removeChild(ripple);
+        }
+    }, 600);
+}
+
+// Create floating particles around the title
+function createFloatingParticles() {
+    const title = document.querySelector('.dashboard-title');
+    if (!title) return;
+    
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'floating-particles';
+    particleContainer.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+    `;
+    
+    // Create multiple floating particles
+    for (let i = 0; i < 5; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'floating-particle';
+        particle.style.cssText = `
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: floatAround 8s linear infinite;
+            animation-delay: ${i * 1.6}s;
+        `;
+        
+        // Random starting position
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        
+        particleContainer.appendChild(particle);
+    }
+    
+    title.appendChild(particleContainer);
+}
+
 // Setup event listeners
 function setupEventListeners() {
     // Filter buttons
