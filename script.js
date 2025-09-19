@@ -16,7 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize dashboard (starts empty, ready for import)
 async function initializeDashboard() {
-    // Load and display tasks
+    // Try to auto-load the local Excel file first
+    const autoLoaded = await tryAutoLoadExcelFile();
+    
+    // Load and display tasks (either from auto-load or existing data)
     const tasks = await loadTasks();
     displayTasks(tasks);
     updateKPIs();
@@ -676,6 +679,32 @@ function handleFileImport(event) {
         reader.readAsArrayBuffer(file);
     } else {
         showNotification('Please use CSV, XLS, or XLSX files for import.', 'error');
+    }
+}
+
+// Try to auto-load the local Excel file
+async function tryAutoLoadExcelFile() {
+    try {
+        // Attempt to fetch the local Excel file
+        const response = await fetch('./R&D Project Management .xlsx');
+        
+        if (!response.ok) {
+            console.log('Local Excel file not found or not accessible');
+            return false;
+        }
+        
+        // Convert response to array buffer
+        const arrayBuffer = await response.arrayBuffer();
+        
+        // Import the Excel file
+        await importFromExcel(arrayBuffer, '.xlsx');
+        
+        console.log('Successfully auto-loaded local Excel file');
+        return true;
+        
+    } catch (error) {
+        console.log('Could not auto-load Excel file:', error.message);
+        return false;
     }
 }
 
