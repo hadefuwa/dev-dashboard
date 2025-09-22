@@ -797,24 +797,23 @@ function importFromCSV(csvContent) {
             return;
         }
         
-        // Confirm import - warn about replacing all data
-        const confirmMessage = `This will REPLACE ALL current data with ${importedTasks.length} tasks from Teams Planner.\n\nAre you sure you want to continue?`;
-        if (confirm(confirmMessage)) {
-            // Clear all existing data and save only imported tasks
-            localStorage.setItem('rdTasks', JSON.stringify(importedTasks));
-            
-            
-            // Refresh dashboard with new data
-            initializeDashboard();
-            
-            // Start auto-rotation with new data
-            if (importedTasks.length > 0) {
-                startAutoRotation(importedTasks);
-            }
-            
-            const message = `Successfully imported ${importedTasks.length} tasks from Teams Planner! Auto-rotation started.`;
-            showNotification(message, 'success');
+        // Confirm import - warn about replacing all data (disabled per request)
+        // const confirmMessage = `This will REPLACE ALL current data with ${importedTasks.length} tasks from Teams Planner.\n\nAre you sure you want to continue?`;
+        // if (confirm(confirmMessage)) {
+        // Clear all existing data and save only imported tasks
+        localStorage.setItem('rdTasks', JSON.stringify(importedTasks));
+
+        // Refresh dashboard with new data
+        initializeDashboard();
+
+        // Start auto-rotation with new data
+        if (importedTasks.length > 0) {
+            startAutoRotation(importedTasks);
         }
+
+        const message = `Successfully imported ${importedTasks.length} tasks from Teams Planner! Auto-rotation started.`;
+        showNotification(message, 'success');
+        // }
         
     } catch (error) {
         showNotification(`Import failed: ${error.message}`, 'error');
