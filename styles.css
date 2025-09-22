@@ -511,12 +511,11 @@ body {
     font-weight: 500;
 }
 
-/* Special styling for different KPI types */
-.kpi-card:nth-child(1) .kpi-number { color: #6366f1; } /* Running - Indigo */
-.kpi-card:nth-child(2) .kpi-number { color: #10b981; } /* Completed - Emerald */
-.kpi-card:nth-child(3) .kpi-number { color: #ef4444; } /* Overdue - Red */
-.kpi-card:nth-child(4) .kpi-number { color: #f59e0b; } /* Unstarted - Amber */
-.kpi-card:nth-child(5) .kpi-number { color: #8b5cf6; } /* PI Forms - Purple */
+/* KPI colors by metric */
+#kpi-overdue-tasks { color: #ef4444; }
+#kpi-completed-tasks { color: #10b981; }
+#kpi-production-handover { color: #6366f1; }
+/* Others (Not Started, In Progress, Urgent) inherit default white */
 
 /* Filter Section */
 .filter-section {
