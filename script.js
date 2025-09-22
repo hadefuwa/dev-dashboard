@@ -16,11 +16,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize dashboard (starts empty, ready for import)
 async function initializeDashboard() {
-    // Try to auto-load the local Excel file first
-    const autoLoaded = await tryAutoLoadExcelFile();
-    
-    // Load and display tasks (either from auto-load or existing data)
+    // Load existing tasks first
     const tasks = await loadTasks();
+    
+    // Only try to auto-load Excel file if no existing data
+    if (!tasks || tasks.length === 0) {
+        const autoLoaded = await tryAutoLoadExcelFile();
+        
+        // If auto-load succeeded, reload tasks
+        if (autoLoaded) {
+            const newTasks = await loadTasks();
+            displayTasks(newTasks);
+            updateKPIs();
+            
+            // Start auto-rotation if tasks exist
+            if (newTasks && newTasks.length > 0) {
+                startAutoRotation(newTasks);
+            } else {
+                updateProgressIndicator(0, 0, 0);
+            }
+            return;
+        }
+    }
+    
+    // Display existing tasks or empty state
     displayTasks(tasks);
     updateKPIs();
     
@@ -682,8 +701,19 @@ function handleFileImport(event) {
     }
 }
 
+// Flag to prevent multiple simultaneous auto-load attempts
+let autoLoadInProgress = false;
+
 // Try to auto-load the Excel file from the same folder as index.html (works locally and on GitHub Pages)
 async function tryAutoLoadExcelFile() {
+    // Prevent multiple simultaneous attempts
+    if (autoLoadInProgress) {
+        console.log('Auto-load: Already in progress, skipping');
+        return false;
+    }
+    
+    autoLoadInProgress = true;
+    
     try {
         // Build a URL-encoded path so spaces and & are handled correctly
         const fileName = 'R&D Project Management .xlsx';
@@ -709,6 +739,8 @@ async function tryAutoLoadExcelFile() {
     } catch (error) {
         console.log('Auto-load: Could not load Excel file:', error.message);
         return false;
+    } finally {
+        autoLoadInProgress = false;
     }
 }
 
