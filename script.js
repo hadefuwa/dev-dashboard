@@ -26,28 +26,24 @@ async function initializeDashboard() {
         // If auto-load succeeded, reload tasks
         if (autoLoaded) {
             const newTasks = await loadTasks();
-            displayTasks(newTasks);
-            updateKPIs();
-            
-            // Start auto-rotation if tasks exist
+            // Start auto-rotation view immediately to avoid showing all tasks at once
             if (newTasks && newTasks.length > 0) {
                 startAutoRotation(newTasks);
+                updateKPIs();
             } else {
+                displayTasks([]);
                 updateProgressIndicator(0, 0, 0);
             }
             return;
         }
     }
     
-    // Display existing tasks or empty state
-    displayTasks(tasks);
-    updateKPIs();
-    
-    // Start auto-rotation if tasks exist
+    // If we have tasks, go straight to auto-rotation 6-card view; otherwise show empty state
     if (tasks && tasks.length > 0) {
         startAutoRotation(tasks);
+        updateKPIs();
     } else {
-        // Update progress indicator for empty state
+        displayTasks([]);
         updateProgressIndicator(0, 0, 0);
     }
 }
@@ -327,11 +323,9 @@ function startAutoRefresh() {
     setInterval(async () => {
         const tasks = await loadTasks();
         if (tasks.length > 0) {
-            // Update display if rotation is active
-            if (rotationInterval) {
-                displaySingleTask(tasks, currentTaskIndex);
-                updateKPIs();
-            }
+            // Always maintain the 6-card rotating view on refresh
+            displayTaskSet(tasks, currentTaskIndex);
+            updateKPIs();
         }
     }, 5 * 60 * 1000); // 5 minutes
 }
