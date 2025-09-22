@@ -764,6 +764,13 @@ body {
     font-weight: 600;
 }
 
+/* Prevent wrapping and long names overflowing in Assigned to */
+.assigned-to {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* Priority Styling */
 .task-priority {
     border-left: 3px solid;

@@ -419,6 +419,9 @@ function createTaskCard(task) {
     // Calculate completion percentage based on bucket
     const completionPercentage = getCompletionPercentage(task.bucketName);
     
+    // Use only first name for Assigned To (before first space)
+    const assignedName = task.assignedTo ? String(task.assignedTo).trim().split(/\s+/)[0] : 'Unassigned';
+    
     card.innerHTML = `
         <div class="task-header">
             <div class="task-title">${task.taskName}</div>
@@ -443,7 +446,7 @@ function createTaskCard(task) {
         
         <div class="task-assignment">
             <span class="assigned-label">Assigned to:</span>
-            <span class="assigned-to">${task.assignedTo || 'Unassigned'}</span>
+            <span class="assigned-to">${assignedName}</span>
         </div>
         
         <div class="task-due-date">
