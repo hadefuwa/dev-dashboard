@@ -1135,7 +1135,6 @@ function updateKPIs() {
     ).length;
     
     // Update KPI displays
-    document.getElementById('kpi-total-tasks').textContent = totalTasks;
     document.getElementById('kpi-in-progress').textContent = inProgressTasks;
     document.getElementById('kpi-completed-tasks').textContent = completedTasks;
     document.getElementById('kpi-overdue-tasks').textContent = overdueTasks;
