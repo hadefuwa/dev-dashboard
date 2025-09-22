@@ -682,34 +682,32 @@ function handleFileImport(event) {
     }
 }
 
-// Try to auto-load the local Excel file (only works locally, not on GitHub Pages)
+// Try to auto-load the Excel file from the same folder as index.html (works locally and on GitHub Pages)
 async function tryAutoLoadExcelFile() {
-    // Only attempt auto-loading if we're running locally (file:// protocol)
-    if (window.location.protocol !== 'file:') {
-        console.log('Auto-loading disabled for web deployment - use manual import instead');
-        return false;
-    }
-    
     try {
-        // Attempt to fetch the local Excel file
-        const response = await fetch('./R&D Project Management .xlsx');
-        
+        // Build a URL-encoded path so spaces and & are handled correctly
+        const fileName = 'R&D Project Management .xlsx';
+        const fileUrl = './' + encodeURIComponent(fileName);
+
+        // Attempt to fetch the Excel file sitting next to index.html
+        const response = await fetch(fileUrl, { cache: 'no-cache' });
+
         if (!response.ok) {
-            console.log('Local Excel file not found or not accessible');
+            console.log('Auto-load: Excel file not found at', fileUrl);
             return false;
         }
-        
+
         // Convert response to array buffer
         const arrayBuffer = await response.arrayBuffer();
-        
+
         // Import the Excel file
         await importFromExcel(arrayBuffer, '.xlsx');
-        
-        console.log('Successfully auto-loaded local Excel file');
+
+        console.log('Auto-load: Successfully loaded Excel file');
         return true;
-        
+
     } catch (error) {
-        console.log('Could not auto-load Excel file:', error.message);
+        console.log('Auto-load: Could not load Excel file:', error.message);
         return false;
     }
 }
