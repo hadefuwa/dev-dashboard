@@ -417,7 +417,7 @@ function createTaskCard(task) {
     
     // Calculate if task is late
     const isLate = task.late === 'true' || task.late === true;
-    const lateIndicator = isLate ? '<span class="late-indicator">⚠️ LATE</span>' : '';
+    const lateIndicator = isLate ? '<span class="late-indicator">Overdue</span>' : '';
     
     // Format dates
     const dueDate = task.dueDate ? formatDate(task.dueDate) : 'No due date';
