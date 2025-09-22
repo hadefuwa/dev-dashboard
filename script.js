@@ -1142,6 +1142,17 @@ function updateKPIs() {
     document.getElementById('kpi-urgent-tasks').textContent = urgentTasks;
     document.getElementById('kpi-not-started').textContent = notStartedTasks;
     
+    // Count tasks in Production Handover phase by bucket name
+    const productionHandoverTasks = tasks.filter(task => {
+        const name = (task.bucketName || '').toLowerCase();
+        return name.includes('production handover') || name.includes('handover');
+    }).length;
+    
+    const handoverEl = document.getElementById('kpi-production-handover');
+    if (handoverEl) {
+        handoverEl.textContent = productionHandoverTasks;
+    }
+    
     // Add animation effect
     animateKPIUpdates();
 }
