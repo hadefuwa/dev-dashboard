@@ -463,7 +463,7 @@ body {
 .kpi-section {
     position: relative;
     z-index: 1;
-    padding: 16px 32px;
+    padding: 8px 24px 8px 24px; /* tighter to give more room to cards */
     background: rgba(10, 11, 30, 0.4);
     border-bottom: 1px solid rgba(75, 85, 99, 0.2);
     flex-shrink: 0;
@@ -576,8 +576,8 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    margin: 16px;
-    padding: 16px;
+    margin: 0 16px 16px 16px; /* remove gap under KPI */
+    padding: 12px; /* slightly tighter padding */
     border-radius: 0;
     backdrop-filter: blur(16px);
     border: 1px solid rgba(99, 102, 241, 0.2);
@@ -599,8 +599,8 @@ body {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: 1fr;
-    gap: 16px;
-    padding: 16px;
+    gap: 12px;
+    padding: 8px; /* minimize internal padding to fit cards */
     max-width: 1600px;
     margin: 0 auto;
     flex: 1;
@@ -613,8 +613,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 16px;
+    gap: 6px;
+    padding: 6px; /* shorter nav slider */
     margin-top: auto;
     flex-shrink: 0;
 }
@@ -622,8 +622,8 @@ body {
 .progress-info {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 1rem;
+    gap: 6px;
+    font-size: 0.85rem; /* smaller */
     color: rgba(255, 255, 255, 0.8);
     font-weight: 500;
 }
@@ -634,13 +634,13 @@ body {
 
 .progress-dots {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     justify-content: center;
 }
 
 .progress-dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
