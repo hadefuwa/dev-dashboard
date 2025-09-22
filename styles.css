@@ -653,35 +653,8 @@ body {
     box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
 }
 
-@media (max-width: 1400px) {
-    .projects-grid {
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(2, 1fr);
-        gap: 16px;
-    }
-}
-
-@media (max-width: 1000px) {
-    .projects-grid {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(2, 1fr);
-        gap: 16px;
-    }
-}
-
-@media (max-width: 768px) {
-    .projects-grid {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(3, 1fr);
-        gap: 12px;
-        padding: 12px;
-    }
-    
-    .projects-section {
-        margin: 12px;
-        padding: 12px;
-    }
-}
+/* Keep a single row with 6 columns at all viewport sizes */
+/* The responsive overrides below were removed intentionally */
 
 
 /* Task Cards */
