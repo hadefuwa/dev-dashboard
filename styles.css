@@ -689,7 +689,7 @@ body {
 }
 
 .task-title {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #ffffff;
     line-height: 1.3;
@@ -829,36 +829,11 @@ body {
 }
 
 /* Card Top Progress Bar */
-.card-progress-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: rgba(99, 102, 241, 0.1);
-    border-radius: 12px 12px 0 0;
-    overflow: hidden;
-    z-index: 2;
-}
+.card-progress-bar { display: none; }
 
-.card-progress-fill {
-    height: 100%;
-    width: var(--progress);
-    background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4);
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-}
+.card-progress-fill { display: none; }
 
-.card-progress-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    animation: progressShine 3s ease-in-out infinite;
-}
+.card-progress-fill::after { display: none; }
 
 @keyframes progressShine {
     0% { transform: translateX(-100%); }

@@ -420,12 +420,6 @@ function createTaskCard(task) {
     const completionPercentage = getCompletionPercentage(task.bucketName);
     
     card.innerHTML = `
-        ${completionPercentage !== null ? `
-        <div class="card-progress-bar" style="--progress: ${completionPercentage}%">
-            <div class="card-progress-fill"></div>
-        </div>
-        ` : ''}
-        
         <div class="task-header">
             <div class="task-title">${task.taskName}</div>
             <div class="task-status ${statusClass}">${statusText}</div>
