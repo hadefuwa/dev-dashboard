@@ -699,13 +699,17 @@ body {
 }
 
 .task-status {
-    padding: 4px 12px;
+    padding: clamp(2px, 0.4vw, 6px) clamp(8px, 1vw, 12px);
     border-radius: 20px;
-    font-size: 0.75rem;
+    font-size: clamp(10px, 1vw, 12px);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
+    max-width: 45%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
 }
 
 .task-status.active {
@@ -811,9 +815,13 @@ body {
 }
 
 .due-value {
-    font-size: 0.95rem;
+    font-size: clamp(0.8rem, 1vw, 0.95rem);
     color: #ffffff;
     font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .due-value.late {
