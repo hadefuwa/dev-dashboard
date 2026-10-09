@@ -447,6 +447,17 @@ function createTaskCard(task) {
     
     // Use only first name for Assigned To (before first space)
     const assignedName = task.assignedTo ? String(task.assignedTo).trim().split(/\s+/)[0] : 'Unassigned';
+
+    let checklistLabel = '';
+    if (task.checklistItems || task.completedChecklistItems) {
+        const completedText = String(task.completedChecklistItems || '');
+        if (completedText.indexOf('/') !== -1) {
+            checklistLabel = 'Checklist ' + completedText;
+        } else if (task.checklistItems) {
+            const totalItems = task.checklistItems.split(';').length;
+            checklistLabel = 'Checklist ' + (completedText || '0') + '/' + totalItems;
+        }
+    }
     
     card.innerHTML = `
         <div class="card-top">
@@ -463,9 +474,9 @@ function createTaskCard(task) {
             </div>
         </div>
         ` : ''}
-        ${task.checklistItems ? `
+        ${checklistLabel ? `
         <div class="task-checklist">
-            <span class="checklist-text">Checklist ${task.completedChecklistItems || '0'}/${task.checklistItems.split(';').length || '0'}</span>
+            <span class="checklist-text">${checklistLabel}</span>
         </div>
         ` : ''}
         ${task.labels ? `
@@ -768,14 +779,18 @@ function importFromExcel(arrayBuffer, fileExtension, quiet) {
             throw new Error('Excel file contains no worksheets.');
         }
         
-        // Get the first worksheet
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
+        // Newer exports put a Plan cover sheet first. The tasks are on Tasks.
+        const taskSheetName = findTaskSheet(workbook);
+        const worksheet = workbook.Sheets[taskSheetName];
         
         // Check if worksheet has data
         if (!worksheet || Object.keys(worksheet).length === 0) {
-            throw new Error('The first worksheet in the Excel file is empty.');
+            throw new Error('The task worksheet in the Excel file is empty.');
         }
+
+        // These sheets turn bucket IDs and user IDs into readable names.
+        const bucketNames = readLookupSheet(workbook, 'Buckets', 'Bucket ID', 'Bucket Name');
+        const userNames = readLookupSheet(workbook, 'Users', 'User ID', 'User Name');
         
         // Convert worksheet to CSV format
         const csvContent = XLSX.utils.sheet_to_csv(worksheet);
@@ -786,7 +801,7 @@ function importFromExcel(arrayBuffer, fileExtension, quiet) {
         }
         
         // Use the existing CSV import function
-        importFromCSV(csvContent, quiet);
+        importFromCSV(csvContent, quiet, bucketNames, userNames);
         
     } catch (error) {
         // Show specific error message
@@ -796,9 +811,99 @@ function importFromExcel(arrayBuffer, fileExtension, quiet) {
 }
 
 // Import from CSV content
-function importFromCSV(csvContent, quiet) {
+// Pick the sheet that holds the task list.
+function findTaskSheet(workbook) {
+    const names = workbook.SheetNames;
+
+    for (let i = 0; i < names.length; i++) {
+        if (names[i].toLowerCase() === 'tasks') {
+            return names[i];
+        }
+    }
+
+    for (let i = 0; i < names.length; i++) {
+        const firstCell = workbook.Sheets[names[i]]['A1'];
+        const firstText = firstCell ? String(firstCell.v || '').toLowerCase() : '';
+        if (firstText.indexOf('task id') !== -1) {
+            return names[i];
+        }
+    }
+
+    return names[0];
+}
+
+// Build a simple id-to-name list from a small sheet such as Buckets or Users.
+function readLookupSheet(workbook, sheetName, idHeader, nameHeader) {
+    const map = {};
+    let foundName = '';
+
+    for (let i = 0; i < workbook.SheetNames.length; i++) {
+        if (workbook.SheetNames[i].toLowerCase() === sheetName.toLowerCase()) {
+            foundName = workbook.SheetNames[i];
+        }
+    }
+
+    if (!foundName) {
+        return map;
+    }
+
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[foundName], { defval: '' });
+    rows.forEach(function(row) {
+        const id = row[idHeader];
+        const name = row[nameHeader];
+        if (id && name) {
+            map[id] = name;
+        }
+    });
+
+    return map;
+}
+
+// Replace one id with its name. If there is no match, keep the original text.
+function lookupName(map, value) {
+    if (!value) {
+        return '';
+    }
+    if (map && map[value]) {
+        return map[value];
+    }
+    return value;
+}
+
+// Assigned To can hold several user ids separated by semicolons.
+function lookupPeople(map, value) {
+    if (!value) {
+        return '';
+    }
+
+    const parts = String(value).split(';');
+    const names = [];
+
+    parts.forEach(function(part) {
+        const trimmed = part.trim();
+        if (!trimmed) {
+            return;
+        }
+        if (map && map[trimmed]) {
+            names.push(map[trimmed]);
+        } else {
+            names.push(trimmed);
+        }
+    });
+
+    return names.join(', ');
+}
+
+function importFromCSV(csvContent, quiet, bucketNames, userNames) {
     try {
         const importedTasks = DataUtils.importFromCSV(csvContent);
+
+        importedTasks.forEach(function(task) {
+            task.bucketName = lookupName(bucketNames, task.bucketName);
+            task.assignedTo = lookupPeople(userNames, task.assignedTo);
+            task.createdBy = lookupName(userNames, task.createdBy);
+            task.completedBy = lookupName(userNames, task.completedBy);
+        });
         
         if (importedTasks.length === 0) {
             showNotification('No valid tasks found in the CSV file.', 'error');

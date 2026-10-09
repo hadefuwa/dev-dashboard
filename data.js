@@ -121,52 +121,58 @@ function importFromCSV(csvContent) {
             throw new Error('CSV file must contain headers and at least one data row');
         }
 
-        // Parse headers
+        // Parse headers. Newer Planner files use slightly different names
+        // (Bucket instead of Bucket Name, Status instead of Progress).
         const headers = parseCSVLine(lines[0]);
-        const expectedHeaders = [
-            'Task ID', 'Task Name', 'Bucket Name', 'Progress', 'Priority',
-            'Assigned To', 'Created By', 'Created Date', 'Start date', 'Due date'
-        ];
+        const taskIdColumn = findColumn(headers, ['task id']);
+        const taskNameColumn = findColumn(headers, ['task name']);
 
-        // Check if this is a Teams Planner export
-        const isTeamsPlanner = headers.length >= 10 && 
-            headers[0].toLowerCase().includes('task id') && 
-            headers[1].toLowerCase().includes('task name');
-
-        if (!isTeamsPlanner) {
+        if (taskIdColumn === -1 || taskNameColumn === -1) {
             throw new Error('This doesn\'t appear to be a Teams Planner export. Expected columns: Task ID, Task Name, Bucket Name, etc.');
         }
+
+        const bucketColumn = findColumn(headers, ['bucket name', 'bucket']);
+        const progressColumn = findColumn(headers, ['progress', 'status']);
+        const priorityColumn = findColumn(headers, ['priority']);
+        const assignedColumn = findColumn(headers, ['assigned to']);
+        const createdByColumn = findColumn(headers, ['created by']);
+        const createdDateColumn = findColumn(headers, ['created date']);
+        const startDateColumn = findColumn(headers, ['start date']);
+        const dueDateColumn = findColumn(headers, ['due date']);
+        const recurringColumn = findColumn(headers, ['is recurring']);
+        const lateColumn = findColumn(headers, ['late']);
+        const completedDateColumn = findColumn(headers, ['completed date']);
+        const completedByColumn = findColumn(headers, ['completed by']);
+        const completedChecklistColumn = findColumn(headers, ['completed checklist items']);
+        const checklistColumn = findColumn(headers, ['checklist items']);
+        const labelsColumn = findColumn(headers, ['labels']);
+        const descriptionColumn = findColumn(headers, ['description', 'notes']);
 
         // Parse data rows
         const tasks = [];
         for (let i = 1; i < lines.length; i++) {
             const values = parseCSVLine(lines[i]);
-            
-            if (values.length < 10) {
-                console.warn(`Skipping row ${i + 1}: insufficient data`);
-                continue;
-            }
 
             // Parse Teams Planner task data
             const task = {
-                taskId: values[0] || '',
-                taskName: values[1] || '',
-                bucketName: values[2] || '',
-                progress: values[3] || '',
-                priority: values[4] || '',
-                assignedTo: values[5] || '',
-                createdBy: values[6] || '',
-                createdDate: values[7] || '',
-                startDate: values[8] || '',
-                dueDate: values[9] || '',
-                isRecurring: values[10] || 'false',
-                late: values[11] || 'false',
-                completedDate: values[12] || '',
-                completedBy: values[13] || '',
-                completedChecklistItems: values[14] || '',
-                checklistItems: values[15] || '',
-                labels: values[16] || '',
-                description: values[17] || ''
+                taskId: readColumn(values, taskIdColumn),
+                taskName: readColumn(values, taskNameColumn),
+                bucketName: readColumn(values, bucketColumn),
+                progress: readColumn(values, progressColumn),
+                priority: readColumn(values, priorityColumn),
+                assignedTo: readColumn(values, assignedColumn),
+                createdBy: readColumn(values, createdByColumn),
+                createdDate: readColumn(values, createdDateColumn),
+                startDate: readColumn(values, startDateColumn),
+                dueDate: readColumn(values, dueDateColumn),
+                isRecurring: readColumn(values, recurringColumn) || 'false',
+                late: readColumn(values, lateColumn) || 'false',
+                completedDate: readColumn(values, completedDateColumn),
+                completedBy: readColumn(values, completedByColumn),
+                completedChecklistItems: readColumn(values, completedChecklistColumn),
+                checklistItems: readColumn(values, checklistColumn),
+                labels: readColumn(values, labelsColumn),
+                description: readColumn(values, descriptionColumn)
             };
 
             // Only add tasks with a task name
@@ -177,8 +183,32 @@ function importFromCSV(csvContent) {
 
         return tasks;
     } catch (error) {
-        throw new Error(`Import failed: ${error.message}`);
+        if (String(error.message).indexOf('Import failed:') === 0) {
+            throw error;
+        }
+        throw new Error('Import failed: ' + error.message);
     }
+}
+
+// Find a column by its header name. Names are compared in lower case.
+function findColumn(headers, possibleNames) {
+    for (let i = 0; i < headers.length; i++) {
+        const header = String(headers[i] || '').toLowerCase().trim();
+        for (let n = 0; n < possibleNames.length; n++) {
+            if (header === possibleNames[n]) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+// Read one cell. Missing columns come back as an empty string.
+function readColumn(values, index) {
+    if (index < 0 || index >= values.length) {
+        return '';
+    }
+    return values[index] || '';
 }
 
 // Helper function to parse CSV line
