@@ -1,8 +1,23 @@
 // Reports Page JavaScript
 document.addEventListener('DOMContentLoaded', function() {
-    setupTitleAnimation();
+    setHeaderDate();
     generateReports();
 });
+
+function setHeaderDate() {
+    const dateElement = document.getElementById('header-date');
+    if (!dateElement) {
+        return;
+    }
+
+    const today = new Date();
+    dateElement.textContent = today.toLocaleDateString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+}
 
 // Setup complex title animation for reports page
 function setupTitleAnimation() {
@@ -317,12 +332,17 @@ function generateRecentActivity(tasks) {
         const activityItem = document.createElement('div');
         activityItem.className = 'activity-item';
         
-        const icon = getActivityIcon(task.progress);
         const timeAgo = getTimeAgo(task.createdDate);
-        
+        let tone = 'waiting';
+        if (task.progress === 'Completed') {
+            tone = 'done';
+        } else if (task.progress === 'In progress') {
+            tone = 'active';
+        }
+
         activityItem.innerHTML = `
-            <span class="activity-icon">${icon}</span>
-            <span class="activity-text">Task "${task.taskName}" created</span>
+            <span class="activity-icon tone-${tone}"></span>
+            <span class="activity-text">${task.taskName}</span>
             <span class="activity-time">${timeAgo}</span>
         `;
         activityContainer.appendChild(activityItem);
@@ -360,11 +380,10 @@ function showEmptyState() {
     const reportsContent = document.querySelector('.reports-content');
     reportsContent.innerHTML = `
         <div class="empty-state">
-            <div class="empty-state-icon">📊</div>
-            <h2>No Data Available</h2>
-            <p>Import some Teams Planner tasks to see detailed reports and analytics.</p>
+            <h2>No tasks yet</h2>
+            <p>Import a Teams Planner file to see this report.</p>
             <button class="btn btn-primary" onclick="window.location.href='index.html'">
-                ← Back to Dashboard
+                Back to dashboard
             </button>
         </div>
     `;

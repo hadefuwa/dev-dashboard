@@ -8,11 +8,27 @@ const sampleProjects = [];
 
 // Initialize the dashboard
 document.addEventListener('DOMContentLoaded', function() {
+    setHeaderDate();
     initializeDashboard();
     setupEventListeners();
-    setupTitleAnimation();
     startAutoRefresh();
 });
+
+// Show today's date in the header
+function setHeaderDate() {
+    const dateElement = document.getElementById('header-date');
+    if (!dateElement) {
+        return;
+    }
+
+    const today = new Date();
+    dateElement.textContent = today.toLocaleDateString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+}
 
 // Initialize dashboard (starts empty, ready for import)
 async function initializeDashboard() {
@@ -214,9 +230,8 @@ function displayTaskSet(tasks, startIndex) {
     if (!tasks || tasks.length === 0) {
         projectsGrid.innerHTML = `
             <div class="empty-state">
-                <div class="empty-state-icon">📋</div>
-                <h3>No Tasks Found</h3>
-                <p>Your dashboard is empty and ready for your Teams Planner data!</p>
+                <h3>No tasks yet</h3>
+                <p>Import a Teams Planner file to fill the board.</p>
             </div>
         `;
         updateProgressIndicator(0, 0, 0);
@@ -367,11 +382,10 @@ function displayTasks(tasks) {
     if (!tasks || tasks.length === 0) {
         const emptyMessage = `
             <div class="empty-state">
-                <div class="empty-state-icon">📋</div>
-                <h3>No Tasks Found</h3>
-                <p>Your dashboard is empty and ready for your Teams Planner data!</p>
+                <h3>No tasks yet</h3>
+                <p>Import a Teams Planner file to fill the board.</p>
                 <div class="empty-state-actions">
-                    <button class="btn btn-primary" onclick="importData()">Import from Teams Planner</button>
+                    <button class="btn btn-primary" onclick="importData()">Import</button>
                 </div>
             </div>
         `;
@@ -407,71 +421,65 @@ function createTaskCard(task) {
     if (task.priority === 'Urgent') priorityClass = 'urgent';
     else if (task.priority === 'Low') priorityClass = 'low';
     
-    card.className = `task-card ${statusClass}`;
-    
     // Calculate if task is late
     const isLate = task.late === 'true' || task.late === true;
     const lateIndicator = isLate ? '<span class="late-indicator">Overdue</span>' : '';
+
+    card.className = `task-card ${statusClass}${isLate ? ' is-late' : ''}`;
     
     // Format dates
     const dueDate = task.dueDate ? formatDate(task.dueDate) : 'No due date';
     
     // Calculate completion percentage based on bucket
     const completionPercentage = getCompletionPercentage(task.bucketName);
+    let progressTone = 'mid';
+    if (completionPercentage !== null && completionPercentage < 30) {
+        progressTone = 'low';
+    } else if (completionPercentage !== null && completionPercentage >= 80) {
+        progressTone = 'high';
+    }
     
     // Use only first name for Assigned To (before first space)
     const assignedName = task.assignedTo ? String(task.assignedTo).trim().split(/\s+/)[0] : 'Unassigned';
     
     card.innerHTML = `
-        <div class="task-header">
-            <div class="task-title">${task.taskName}</div>
+        <div class="card-top">
             <div class="task-status ${statusClass}">${statusText}</div>
+            <div class="priority-chip priority-${priorityClass}">${task.priority || 'Medium'}</div>
         </div>
-        
-        
-        <div class="task-bucket">
-            <span class="bucket-label">Bucket:</span>
-            <span class="bucket-name">${task.bucketName}</span>
-        </div>
-        
+        <div class="task-title">${task.taskName}</div>
+        <div class="bucket-name">${task.bucketName || 'No bucket'}</div>
         ${completionPercentage !== null ? `
         <div class="task-progress-text">
-            <span class="progress-text">Progress: ${completionPercentage}%</span>
+            <span class="progress-text">${completionPercentage}% complete</span>
+            <div class="card-progress-bar">
+                <div class="card-progress-fill tone-${progressTone}" style="width: ${completionPercentage}%"></div>
+            </div>
         </div>
         ` : ''}
-        
-        <div class="task-priority priority-${priorityClass}">
-            Priority: ${task.priority}
-            </div>
-        
-        <div class="task-assignment">
-            <span class="assigned-label">Assigned to:</span>
-            <span class="assigned-to">${assignedName}</span>
-        </div>
-        
-        <div class="task-due-date">
-            <span class="due-label">Due:</span>
-            <span class="due-value ${isLate ? 'late' : ''}">${dueDate}</span>
-            ${lateIndicator}
-        </div>
-        
         ${task.checklistItems ? `
         <div class="task-checklist">
-            <div class="checklist-label">Checklist:</div>
-            <div class="checklist-progress">
-                <span class="checklist-text">${task.completedChecklistItems || '0'}/${task.checklistItems.split(';').length || '0'}</span>
-                <div class="checklist-items">${task.checklistItems}</div>
-            </div>
+            <span class="checklist-text">Checklist ${task.completedChecklistItems || '0'}/${task.checklistItems.split(';').length || '0'}</span>
         </div>
         ` : ''}
-        
         ${task.labels ? `
         <div class="task-labels">
-            <span class="labels-label">Labels:</span>
             <span class="labels-text">${task.labels}</span>
-                </div>
+        </div>
         ` : ''}
-        
+        <div class="task-footer">
+            <div class="task-assignment">
+                <span class="assigned-label">Owner</span>
+                <span class="assigned-to">${assignedName}</span>
+            </div>
+            <div class="task-due-date">
+                <span class="due-label">Due</span>
+                <span class="due-value-wrap">
+                    <span class="due-value ${isLate ? 'late' : ''}">${dueDate}</span>
+                    ${lateIndicator}
+                </span>
+            </div>
+        </div>
     `;
     
     return card;
@@ -527,19 +535,19 @@ function viewProjectDetails(projectId) {
     detailsContent.innerHTML = `
         <div style="padding: 20px;">
             <div style="margin-bottom: 20px;">
-                <h3 style="color: #87CEEB; margin-bottom: 10px;">Description</h3>
-                <p style="color: rgba(255,255,255,0.8);">${project.description}</p>
+                <h3 style="color: #1b3a4b; margin-bottom: 10px;">Description</h3>
+                <p style="color: #3d4f5f;">${project.description}</p>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div>
-                    <h3 style="color: #87CEEB; margin-bottom: 10px;">Project Info</h3>
+                    <h3 style="color: #1b3a4b; margin-bottom: 10px;">Project Info</h3>
                     <p><strong>Type:</strong> ${project.projectType}</p>
                     <p><strong>Status:</strong> ${project.status}</p>
                     <p><strong>Progress:</strong> ${project.progress}%</p>
                 </div>
                 <div>
-                    <h3 style="color: #87CEEB; margin-bottom: 10px;">Timeline</h3>
+                    <h3 style="color: #1b3a4b; margin-bottom: 10px;">Timeline</h3>
                     <p><strong>Start Date:</strong> ${formatDate(project.startDate)}</p>
                     <p><strong>End Date:</strong> ${formatDate(project.endDate)}</p>
                 </div>
@@ -547,7 +555,7 @@ function viewProjectDetails(projectId) {
             
             ${project.teamMembers && project.teamMembers.length > 0 ? `
             <div style="margin-bottom: 20px;">
-                <h3 style="color: #87CEEB; margin-bottom: 10px;">Team Members</h3>
+                <h3 style="color: #1b3a4b; margin-bottom: 10px;">Team Members</h3>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                     ${project.teamMembers.map(member => `<span class="team-member">${member}</span>`).join('')}
                 </div>
@@ -556,8 +564,8 @@ function viewProjectDetails(projectId) {
             
             ${project.notes ? `
             <div>
-                <h3 style="color: #87CEEB; margin-bottom: 10px;">Notes</h3>
-                <p style="color: rgba(255,255,255,0.8);">${project.notes}</p>
+                <h3 style="color: #1b3a4b; margin-bottom: 10px;">Notes</h3>
+                <p style="color: #3d4f5f;">${project.notes}</p>
             </div>
             ` : ''}
         </div>
@@ -974,19 +982,19 @@ function viewProjectDetails(projectId) {
     detailsContent.innerHTML = `
         <div style="padding: 20px;">
             <div style="margin-bottom: 20px;">
-                <h3 style="color: #87CEEB; margin-bottom: 10px;">Description</h3>
-                <p style="color: rgba(255,255,255,0.8);">${project.description}</p>
+                <h3 style="color: #1b3a4b; margin-bottom: 10px;">Description</h3>
+                <p style="color: #3d4f5f;">${project.description}</p>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div>
-                    <h3 style="color: #87CEEB; margin-bottom: 10px;">Project Info</h3>
+                    <h3 style="color: #1b3a4b; margin-bottom: 10px;">Project Info</h3>
                     <p><strong>Type:</strong> ${project.projectType}</p>
                     <p><strong>Status:</strong> ${project.status}</p>
                     <p><strong>Progress:</strong> ${project.progress}%</p>
                 </div>
                 <div>
-                    <h3 style="color: #87CEEB; margin-bottom: 10px;">Timeline</h3>
+                    <h3 style="color: #1b3a4b; margin-bottom: 10px;">Timeline</h3>
                     <p><strong>Start Date:</strong> ${formatDate(project.startDate)}</p>
                     <p><strong>End Date:</strong> ${formatDate(project.endDate)}</p>
                 </div>
@@ -994,7 +1002,7 @@ function viewProjectDetails(projectId) {
             
             ${project.teamMembers && project.teamMembers.length > 0 ? `
             <div style="margin-bottom: 20px;">
-                <h3 style="color: #87CEEB; margin-bottom: 10px;">Team Members</h3>
+                <h3 style="color: #1b3a4b; margin-bottom: 10px;">Team Members</h3>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                     ${project.teamMembers.map(member => `<span class="team-member">${member}</span>`).join('')}
                 </div>
@@ -1003,15 +1011,15 @@ function viewProjectDetails(projectId) {
             
             ${project.milestones && project.milestones.length > 0 ? `
             <div style="margin-bottom: 20px;">
-                <h3 style="color: #87CEEB; margin-bottom: 10px;">Milestones</h3>
-                <div style="background: rgba(47, 27, 77, 0.6); border-radius: 8px; padding: 15px;">
+                <h3 style="color: #1b3a4b; margin-bottom: 10px;">Milestones</h3>
+                <div style="background: #f4f7f9; border-radius: 8px; padding: 15px; border: 1px solid #e3e8ee;">
                     ${project.milestones.map(milestone => `
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(135, 206, 235, 0.2);">
                             <div>
                                 <span style="color: ${milestone.completed ? '#2ecc71' : '#f39c12'};">
                                     ${milestone.completed ? '✓' : '○'}
                                 </span>
-                                <span style="color: ${milestone.completed ? 'rgba(255,255,255,0.6)' : '#87CEEB'}; margin-left: 10px;">
+                                <span style="color: ${milestone.completed ? 'rgba(255,255,255,0.6)' : '#1b3a4b'}; margin-left: 10px;">
                                     ${milestone.name}
                                 </span>
                             </div>
@@ -1026,8 +1034,8 @@ function viewProjectDetails(projectId) {
             
             ${project.notes ? `
             <div>
-                <h3 style="color: #87CEEB; margin-bottom: 10px;">Notes</h3>
-                <p style="color: rgba(255,255,255,0.8);">${project.notes}</p>
+                <h3 style="color: #1b3a4b; margin-bottom: 10px;">Notes</h3>
+                <p style="color: #3d4f5f;">${project.notes}</p>
             </div>
             ` : ''}
         </div>
@@ -1209,17 +1217,16 @@ function showNotification(message, type = 'info') {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: ${type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#3498db'};
+        background: ${type === 'success' ? '#1e7a46' : type === 'error' ? '#a32020' : '#1b3a4b'};
         color: white;
-        padding: 15px 20px;
+        padding: 12px 14px;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 8px 24px rgba(28, 40, 51, 0.16);
         z-index: 10000;
         font-family: Inter, sans-serif;
-        max-width: 350px;
-        font-size: 14px;
+        max-width: 320px;
+        font-size: 13px;
         line-height: 1.4;
-        border: 1px solid ${type === 'success' ? 'rgba(46, 204, 113, 0.3)' : type === 'error' ? 'rgba(231, 76, 60, 0.3)' : 'rgba(52, 152, 219, 0.3)'};
         animation: slideInNotification 0.3s ease-out;
     `;
     notification.textContent = message;
