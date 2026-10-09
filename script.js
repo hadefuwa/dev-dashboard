@@ -30,15 +30,19 @@ function setHeaderDate() {
     });
 }
 
+// True while the page is reading the spreadsheet, so it does not start a second read
+let loadingFromFile = false;
+
 // Initialize dashboard (starts empty, ready for import)
 async function initializeDashboard() {
     // Load existing tasks first
     const tasks = await loadTasks();
-    
-    // Only try to auto-load Excel file if no existing data
-    if (!tasks || tasks.length === 0) {
+
+    // Always try the spreadsheet next to this page.
+    // A newer file then replaces tasks saved in the browser.
+    if (!loadingFromFile) {
         const autoLoaded = await tryAutoLoadExcelFile();
-        
+
         // If auto-load succeeded, reload tasks
         if (autoLoaded) {
             const newTasks = await loadTasks();
@@ -49,6 +53,7 @@ async function initializeDashboard() {
             } else {
                 displayTasks([]);
                 updateProgressIndicator(0, 0, 0);
+                updateKPIs();
             }
             return;
         }
@@ -61,6 +66,7 @@ async function initializeDashboard() {
     } else {
         displayTasks([]);
         updateProgressIndicator(0, 0, 0);
+        updateKPIs();
     }
 }
 
@@ -729,8 +735,10 @@ async function tryAutoLoadExcelFile() {
         // Convert response to array buffer
         const arrayBuffer = await response.arrayBuffer();
 
-        // Import the Excel file
-        await importFromExcel(arrayBuffer, '.xlsx');
+        // Import the Excel file. Stay quiet so a wall display does not
+        // pop up a message every time the page opens.
+        loadingFromFile = true;
+        await importFromExcel(arrayBuffer, '.xlsx', true);
 
         console.log('Auto-load: Successfully loaded Excel file');
         return true;
@@ -739,12 +747,13 @@ async function tryAutoLoadExcelFile() {
         console.log('Auto-load: Could not load Excel file:', error.message);
         return false;
     } finally {
+        loadingFromFile = false;
         autoLoadInProgress = false;
     }
 }
 
 // Import from Excel files (XLS/XLSX)
-function importFromExcel(arrayBuffer, fileExtension) {
+function importFromExcel(arrayBuffer, fileExtension, quiet) {
     try {
         // Check if XLSX library is available
         if (typeof XLSX === 'undefined') {
@@ -777,7 +786,7 @@ function importFromExcel(arrayBuffer, fileExtension) {
         }
         
         // Use the existing CSV import function
-        importFromCSV(csvContent);
+        importFromCSV(csvContent, quiet);
         
     } catch (error) {
         // Show specific error message
@@ -787,7 +796,7 @@ function importFromExcel(arrayBuffer, fileExtension) {
 }
 
 // Import from CSV content
-function importFromCSV(csvContent) {
+function importFromCSV(csvContent, quiet) {
     try {
         const importedTasks = DataUtils.importFromCSV(csvContent);
         
@@ -810,8 +819,10 @@ function importFromCSV(csvContent) {
             startAutoRotation(importedTasks);
         }
 
-        const message = `Successfully imported ${importedTasks.length} tasks from Teams Planner! Auto-rotation started.`;
-        showNotification(message, 'success');
+        if (!quiet) {
+            const message = `Successfully imported ${importedTasks.length} tasks from Teams Planner! Auto-rotation started.`;
+            showNotification(message, 'success');
+        }
         // }
         
     } catch (error) {
@@ -1091,12 +1102,21 @@ function updateKPIs() {
     
     if (!tasks || tasks.length === 0) {
         // Reset all KPIs to 0 when no data
-        document.getElementById('kpi-total-tasks').textContent = '0';
-        document.getElementById('kpi-in-progress').textContent = '0';
-        document.getElementById('kpi-completed-tasks').textContent = '0';
-        document.getElementById('kpi-overdue-tasks').textContent = '0';
-        document.getElementById('kpi-urgent-tasks').textContent = '0';
-        document.getElementById('kpi-not-started').textContent = '0';
+        const kpiIds = [
+            'kpi-in-progress',
+            'kpi-completed-tasks',
+            'kpi-overdue-tasks',
+            'kpi-urgent-tasks',
+            'kpi-not-started',
+            'kpi-production-handover'
+        ];
+        kpiIds.forEach(function(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = '0';
+            }
+        });
+        updateStageChart([]);
         return;
     }
     
@@ -1150,9 +1170,90 @@ function updateKPIs() {
     if (handoverEl) {
         handoverEl.textContent = productionHandoverTasks;
     }
+
+    updateStageChart(tasks);
     
     // Add animation effect
     animateKPIUpdates();
+}
+
+// Draw one bar per bucket. The longest bar is the fullest stage.
+function updateStageChart(tasks) {
+    const chart = document.getElementById('stage-chart');
+    const note = document.getElementById('chart-note');
+    if (!chart) {
+        return;
+    }
+
+    chart.innerHTML = '';
+
+    if (!tasks || tasks.length === 0) {
+        chart.innerHTML = '<p class="chart-empty">No tasks yet.</p>';
+        if (note) {
+            note.textContent = 'How many tasks sit in each bucket.';
+        }
+        return;
+    }
+
+    // Count tasks in each bucket
+    const counts = {};
+    tasks.forEach(function(task) {
+        const name = task.bucketName || 'No bucket';
+        if (!counts[name]) {
+            counts[name] = 0;
+        }
+        counts[name] = counts[name] + 1;
+    });
+
+    // Turn the counts into a list, biggest first
+    const rows = [];
+    Object.keys(counts).forEach(function(name) {
+        rows.push({ name: name, count: counts[name] });
+    });
+    rows.sort(function(a, b) {
+        return b.count - a.count;
+    });
+
+    // Keep the chart short enough to sit above the task cards
+    const visibleRows = rows.slice(0, 6);
+    const biggest = visibleRows[0].count;
+
+    visibleRows.forEach(function(row) {
+        const width = Math.round((row.count / biggest) * 100);
+
+        const item = document.createElement('div');
+        item.className = 'chart-row';
+
+        const label = document.createElement('div');
+        label.className = 'chart-label';
+        label.textContent = row.name;
+        label.title = row.name;
+
+        const track = document.createElement('div');
+        track.className = 'chart-track';
+
+        const fill = document.createElement('div');
+        fill.className = 'chart-fill';
+        fill.style.width = width + '%';
+        track.appendChild(fill);
+
+        const count = document.createElement('div');
+        count.className = 'chart-count';
+        count.textContent = String(row.count);
+
+        item.appendChild(label);
+        item.appendChild(track);
+        item.appendChild(count);
+        chart.appendChild(item);
+    });
+
+    if (note) {
+        if (rows.length > visibleRows.length) {
+            note.textContent = 'Top ' + visibleRows.length + ' buckets, by number of tasks.';
+        } else {
+            note.textContent = tasks.length + ' tasks across ' + rows.length + ' buckets.';
+        }
+    }
 }
 
 function animateKPIUpdates() {

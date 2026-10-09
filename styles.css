@@ -211,6 +211,73 @@ body {
     font-weight: 500;
 }
 
+/* Stage bar chart */
+.chart-section {
+    padding: 12px 28px 0;
+    flex-shrink: 0;
+}
+
+.chart-card {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 20px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: var(--shadow);
+}
+
+.bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.chart-empty {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.chart-row {
+    display: grid;
+    grid-template-columns: 190px 1fr 28px;
+    gap: 10px;
+    align-items: center;
+}
+
+.chart-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chart-track {
+    height: 8px;
+    background: #e6ebf0;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.chart-fill {
+    height: 100%;
+    background: var(--navy);
+    border-radius: 99px;
+}
+
+.chart-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
 /* Task board */
 .projects-section {
     flex: 1;
@@ -861,6 +928,11 @@ body {
 @media (max-width: 1100px) {
     .kpi-container {
         grid-template-columns: repeat(3, 1fr);
+    }
+
+    .chart-card,
+    .chart-row {
+        grid-template-columns: 1fr;
     }
 
     .projects-grid {
